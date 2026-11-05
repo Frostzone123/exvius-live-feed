@@ -336,6 +336,8 @@ def _load_ndjson(fname: str, key_token: str | None = None) -> dict:
         return _TABLES[cache_key]
     path = os.path.join(MST_DIR, fname)
     rows: dict = {}
+    if not os.path.exists(path):
+        return rows
     with open(path, encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
@@ -4291,6 +4293,11 @@ class PlayerState:
             weights = [max(0.0, float(e.get('rate') or 0)) for e in cand]
             for idx in range(draws - reserved - guaranteed_count, draws - reserved):
                 awards[idx] = random.choices(cand, weights)[0] if sum(weights) > 0 else random.choice(cand)
+            if guarantee.get("any_of"):
+                any_cands = [e for e in cand if str(e.get("unit_id")) in map(str, guarantee["any_of"])]
+                if any_cands and not any(str(a.get("unit_id")) in map(str, guarantee["any_of"]) for a in awards):
+                    target_slot = draws - reserved - 1
+                    awards[target_slot] = random.choice(any_cands)
         cursor = draws - reserved
         for count, candidates in extra_slots:
             weights = [max(0, float(entry.get('rate', 0))) for entry in candidates]

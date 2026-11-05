@@ -267,12 +267,56 @@ def all_banners() -> list:
     for b in named_banners():
         by_id[str(b["id"])] = b
     for b in authored_banners():
-        by_id[str(b["id"])] = b
+        bid = str(b.get("id"))
+        if bid == "9900001":
+            pool_ids = []
+            if st.State.player:
+                pool_ids = list(st.State.player.data.get("custom_stepup_pool") or [])
+                if not pool_ids and st.State.player.data.get("custom_stepup_unit"):
+                    pool_ids = [str(st.State.player.data["custom_stepup_unit"])]
+            nv_rateups = []
+            star5_rateups = []
+            try:
+                from player_state import unit_mst
+                for uid in pool_ids:
+                    u_str = str(uid)
+                    u_info = unit_mst(u_str) or {}
+                    rarity = int(u_info.get("9fW0TePj") or 7)
+                    if rarity == 7:
+                        nv_rateups.append(u_str)
+                    else:
+                        star5_rateups.append(u_str)
+            except Exception:
+                pass
+            b["name"] = "United Forces Step-Up Summon"
+            for tier in (b.get("pool") or {}).get("tiers", []):
+                t_rarity = int(tier.get("rarity") or 0)
+                if t_rarity == 7 and nv_rateups:
+                    tier["featured"] = nv_rateups
+                    tier["featured_share"] = 0.60
+                    tier_units = list(tier.get("units") or [])
+                    for u in nv_rateups:
+                        if u not in tier_units:
+                            tier_units.append(u)
+                    tier["units"] = tier_units
+                elif t_rarity == 5 and star5_rateups:
+                    tier["featured"] = star5_rateups
+                    tier["featured_share"] = 0.60
+                    tier_units = list(tier.get("units") or [])
+                    for u in star5_rateups:
+                        if u not in tier_units:
+                            tier_units.append(u)
+                    tier["units"] = tier_units
+            if nv_rateups and b.get("steps") and len(b["steps"]) >= 6:
+                b["steps"][5]["guarantee"]["any_of"] = nv_rateups
+        by_id[bid] = b
     # Archive identity merging shows a replacement and its calendar alias once.
     # Keep both IDs resolvable for requests already issued by an older client.
     only = gacha_only_ids()
     if only:
         kept = {k: v for k, v in by_id.items() if k in only}
+        if "9900001" in by_id:
+            kept["9900001"] = by_id["9900001"]
         missing = sorted(only - set(kept))
         if not _ONLY_LOGGED[0]:
             _ONLY_LOGGED[0] = True
@@ -281,8 +325,9 @@ def all_banners() -> list:
         return list(kept.values())
     sel = campaign_selection()
     if sel:
-        std, ids, label = sel
         kept = {k: v for k, v in by_id.items() if k in ids}
+        if "9900001" in by_id:
+            kept["9900001"] = by_id["9900001"]
         if not _CAMPAIGN_LOGGED[0]:
             _CAMPAIGN_LOGGED[0] = True
             _note(f"gacha campaign {st.GACHA_CAMPAIGN or '(file default)'!r} "
