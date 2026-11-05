@@ -2,27 +2,27 @@
   "files": [
     {
       "name": "ffbe_gacha.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py?v=14",
-      "sha256": "eae31a52c8b3b5d076c1d967b62ed26980c146959000a0463c98f5ad6def1058"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py?v=15",
+      "sha256": "300541f4317ffb468ca57708d97a1c4a8e7049322b35a6499387484d0aff3b3d"
     },
     {
       "name": "ffbe_player.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=14",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=15",
       "sha256": "829c7ef43534c55fb1aab2f8902aaa9bd1d2d7ad7ad5bf1731a1b02784d7e314"
     },
     {
       "name": "ffbe_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=14",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=15",
       "sha256": "464c858ebeb42eae5d16df67520786d70cb2288fb81bc7232e4f78ef20b93431"
     },
     {
       "name": "gacha_rates.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_rates.py?v=14",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_rates.py?v=15",
       "sha256": "ff157dea59d3500d509c04d76b3c4a1e4ac9b32a7bdd8fd3ec9a454895b95060"
     },
     {
       "name": "player_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=14",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=15",
       "sha256": "579c38f9516b14337bd89e68ff3eebbe436ff51799d4cca1b0c67574605a9027"
     }
   ]
