@@ -3,7 +3,7 @@
     {
       "name": "ffbe_gacha.py",
       "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py",
-      "sha256": "253a88ec57967e4988aa34fc417833f822000a91819185fb7c33901352a19145"
+      "sha256": "c8b9e6ce18931fd41e341d38e6be9b6925290e286d77f68be6b772267c2b2af2"
     },
     {
       "name": "ffbe_player.py",
@@ -14,6 +14,11 @@
       "name": "ffbe_state.py",
       "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py",
       "sha256": "464c858ebeb42eae5d16df67520786d70cb2288fb81bc7232e4f78ef20b93431"
+    },
+    {
+      "name": "gacha_rates.py",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_rates.py",
+      "sha256": "c856a497785e055c84c4bf0e828acb33a5959510fd4882f8304c215231b23e8b"
     },
     {
       "name": "player_state.py",

@@ -288,7 +288,13 @@ def all_banners() -> list:
                         star5_rateups.append(u_str)
             except Exception:
                 pass
-            b["name"] = "United Forces Step-Up Summon"
+            has_rateup = bool(nv_rateups or star5_rateups)
+            if not has_rateup:
+                b["locked_no_rateup"] = True
+                b["name"] = "United Forces Step-Up [Locked: Tap Drop Rates]"
+            else:
+                b.pop("locked_no_rateup", None)
+                b["name"] = "United Forces Step-Up Summon"
             for tier in (b.get("pool") or {}).get("tiers", []):
                 t_rarity = int(tier.get("rarity") or 0)
                 if t_rarity == 7 and nv_rateups:
@@ -515,7 +521,10 @@ def _gacha_detail_row(b, art, detail_id, cost, draws, exe_type=None, img_btn=Non
     # A once-a-day offer: `1ovyP04j` is the row's exeLimit (+0x90, "<max>:<period>").
     # GachaDetailMst::getRemainingGachaLimit = max - today's UserGachaInfo termExeCnt for this gacha+detail
     # (UserGachaInfoList::getObjectToday), so the client shows the offer as used once it is spent.
-    if (b.get("daily_limit") or b.get('weekly_limit')) and str(exe_type or b.get("exe_type", "primary")) != "secondary":
+    if b.get("locked_no_rateup"):
+        det["1ovyP04j"] = "0:1"
+        det["G4L0YIB2"] = "Select Rate-Up in Drop Rates First"
+    elif (b.get("daily_limit") or b.get('weekly_limit')) and str(exe_type or b.get("exe_type", "primary")) != "secondary":
         det["1ovyP04j"] = f"{int(b.get('weekly_limit') or b['daily_limit'])}:1"
     if b.get('boxes'):
         det['h6Tg0oGd'] = str(b['box_id'])
@@ -814,6 +823,15 @@ def serve_gacha(spec, plaintext: str | None = None, reply_id=None):
         offer = gacha_offer_for(banner, req_detail)
         _note(f"gacha: pull banner {banner['id']} row={req_detail or '?'} "
               f"({'secondary offer' if offer else 'primary'}) repeats={repeats} ticket={ticket_id}")
+        if str(banner.get("id")) == "9900001":
+            pool_ids = []
+            if State.player:
+                pool_ids = list(State.player.data.get("custom_stepup_pool") or [])
+                if not pool_ids and State.player.data.get("custom_stepup_unit"):
+                    pool_ids = [str(State.player.data["custom_stepup_unit"])]
+            if not pool_ids:
+                _note("gacha: banner 9900001 pull refused - no rate-up units selected in Drop Rates")
+                return decline()
         if State.player and banner.get('boxes'):
             from gacha_box import roll
             res = roll(State.player, banner, req_detail, repeats)
@@ -915,3 +933,31 @@ def serve_gacha(spec, plaintext: str | None = None, reply_id=None):
     print(f"    gacha: awarded {res['unit_id']} (granted rarity {res['granted_rarity']}, pattern "
           f"{res['pattern_id']}) -> roster now {len(State.player.data['roster'])} unit(s)", flush=True)
     return out
+
+
+def custom_target_name(player) -> str:
+    if not player:
+        return "Select in Drop Rates (Locked)"
+    pool_ids = list(player.data.get("custom_stepup_pool") or [])
+    if not pool_ids and player.data.get("custom_stepup_unit"):
+        pool_ids = [str(player.data["custom_stepup_unit"])]
+    names = [unit_name(uid) or f"Unit {uid}" for uid in pool_ids if unit_name(uid) or uid]
+    if not names:
+        return "Select in Drop Rates (Locked)"
+    elif len(names) == 1:
+        return names[0]
+    elif len(names) == 2:
+        return f"{names[0]}, {names[1]}"
+    else:
+        return f"{names[0]} + {len(names) - 1} more"
+
+
+def custom_banner_explanation(player) -> str:
+    if not player:
+        return ""
+    pool_ids = list(player.data.get("custom_stepup_pool") or [])
+    if not pool_ids and player.data.get("custom_stepup_unit"):
+        pool_ids = [str(player.data["custom_stepup_unit"])]
+    if not pool_ids:
+        return "Locked: Tap 'Drop Rates' to pick your featured Neo Vision and 5★ characters to unlock summoning."
+    return ""
