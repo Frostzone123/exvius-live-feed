@@ -3460,18 +3460,31 @@ def serve_emblem_event(spec, reply_id):
     return out
 
 
-def credit_emblem_objectives(plaintext, spec):
+def credit_emblem_objectives(*args, **kwargs):
     """A `MissionEndRequest` -> the campaign's objectives (a state write; the pipeline step calls this).
 
-    **A TRANSFORM like every other step, so it returns the spec** -- and this is not a formality: the
-    pipeline assigns `ctx.spec = step.call(ctx)`, so the FIRST version of this function, which returned
-    `None` on its early paths, blanked **97 of the 109** golden cases. The replay caught it in one run,
-    which is the whole argument for `harness/server_regression.py`: a step that forgets its return value
-    is indistinguishable from a correct one until a replay compares bytes.
-
-    The mission id rides `jQsE54Iz.qo3PECw6`. Deliver any earned crest tier here so it reaches the player
-    even if they never open the Adventurer Crests screen.
+    Accepts variable arguments to support (plaintext, spec), (spec, plaintext, mid), etc. safely.
     """
+    spec = None
+    plaintext = None
+    mid = None
+    for a in args:
+        if isinstance(a, dict):
+            spec = a
+        elif isinstance(a, str):
+            if plaintext is None and ('{' in a or '[' in a):
+                plaintext = a
+            elif mid is None:
+                mid = a
+            elif plaintext is None:
+                plaintext = a
+    if spec is None:
+        for a in args:
+            if isinstance(a, dict):
+                spec = a
+                break
+        if spec is None:
+            spec = kwargs.get('spec', {})
     if State.player is None or not plaintext:
         return spec
     try:
@@ -3482,7 +3495,8 @@ def credit_emblem_objectives(plaintext, spec):
     rows = req.get(PROGRESS_MISSION_GROUP) if isinstance(req, dict) else None
     if not isinstance(rows, list) or not rows or not isinstance(rows[0], dict):
         return spec
-    mid = str(rows[0].get(PROGRESS_MISSION_TOKEN) or "")
+    if not mid:
+        mid = str(rows[0].get(PROGRESS_MISSION_TOKEN) or "")
     if mid and State.player.credit_emblem_objective(mid):
         deliver_emblem_tier_mail()
     return spec
