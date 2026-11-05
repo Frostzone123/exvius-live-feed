@@ -1,26 +1,26 @@
 {
   "_comment": "OTA Python/JSON server patches fetched at app launch.",
-  "version": 7,
+  "version": 8,
   "files": [
     {
       "name": "ffbe_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=7",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=8",
       "sha256": "464c858ebeb42eae5d16df67520786d70cb2288fb81bc7232e4f78ef20b93431"
     },
     {
       "name": "ffbe_player.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=7",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=8",
       "sha256": "626b08591be66839851d5c77bfdfba180e0735cd9ac9e8451bbaa418805d9f78"
     },
     {
       "name": "ffbe_gacha.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py?v=7",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py?v=8",
       "sha256": "fa1538b4a77546e3ffd466bd4967243b8112bba4aa7ee714fe7dac525b281d7d"
     },
     {
       "name": "player_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=7",
-      "sha256": "c7fb442f63cceedaa31377f401f59605f05aeb26708d68188df3cbdbebb43ca9"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=8",
+      "sha256": "a2c93d2a1e7a85d0b2173fba052c94b28215bc2ec2b5b4369f1506c08a7e92a5"
     }
   ]
 }

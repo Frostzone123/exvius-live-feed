@@ -2,10 +2,10 @@
 
 Lightweight live-configuration feed for custom **In-Game Mailbox Gifts**, **Over-the-Air (OTA) Server Hot-Patches**, and **Patched APK Releases**.
 
-## Direct APK Downloads (`v0.1.22-patched`)
-- **[Download Bonus Patched APK (`exvius-offline-v0.1.22-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.22-patched/exvius-offline-v0.1.22-patched-bonus.apk)** (Recommended) — Includes a one-time **9,000,000 Lapis + 100,000,000 Gil** starter bonus + all upstream v0.1.22 fixes + BlueStacks/Android 13–16 fixes + Live Mailbox/OTA feed.
-- **[Download Standard Patched APK (`exvius-offline-v0.1.22-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.22-patched/exvius-offline-v0.1.22-patched.apk)** — Vanilla starting Lapis/Gil + all fixes + Live Mailbox/OTA feed.
-- **[View Release Notes & Changelog](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.22-patched)**
+## Direct APK Downloads (`v0.1.23-patched`)
+- **[Download Bonus Patched APK (`exvius-offline-v0.1.23-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk)** (Recommended) — Includes a one-time **9,000,000 Lapis + 100,000,000 Gil** starter bonus + all upstream v0.1.23 fixes (adaptive layout, shop fixes) + BlueStacks/Android 13–16 fixes + infinite step-up pulls + Live Mailbox/OTA feed.
+- **[Download Standard Patched APK (`exvius-offline-v0.1.23-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched.apk)** — Vanilla starting Lapis/Gil + all fixes + Live Mailbox/OTA feed.
+- **[View Release Notes & Changelog](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.23-patched)**
 
 ---
 

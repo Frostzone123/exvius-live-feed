@@ -3761,8 +3761,9 @@ class PlayerState:
         unread = sum(1 for m in self.mailbox if int(m.get("receive_type", 0) or 0) == 0)
         received = sum(1 for m in self.mailbox if int(m.get("receive_type", 0) or 0) == 2)
         protect = sum(1 for m in self.mailbox if str(m.get("protect_date") or ""))
-        return [{"2BW7YLwg": str(total), "mzR39KXj": str(received),
-                 "TnZ3J4v8": str(protect), "sC84jvZH": str(unread)}]
+        badge = max(1, unread)
+        return [{"2BW7YLwg": str(max(1, total)), "mzR39KXj": str(received),
+                 "TnZ3J4v8": str(protect), "sC84jvZH": str(badge)}]
 
     def grant_switch(self, stype, index: int) -> None:
         if not self._mutate():

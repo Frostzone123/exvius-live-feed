@@ -140,5 +140,13 @@
   ],
   "downloadBytes": 14647871919,
   "installedBytes": 14948691529,
-  "files": 12487
+  "files": 12487,
+  "app": {
+    "version": "0.1.23",
+    "versionName": "9.0.0-offline.23",
+    "versionCode": 9024,
+    "url": "https://github.com/Elvlin/exvius-offline/releases/download/v0.1.23/exvius-offline-v0.1.23.apk",
+    "size": 74304226,
+    "sha256": "dc187697c5d8f104c363527b5d21955e8edee0921525d82b9d4feec9fb83e152"
+  }
 }
