@@ -9,6 +9,15 @@
       "items": [
         [50, 1, 5000]
       ]
+    },
+    {
+      "mail_id": "frost_fp_test_002",
+      "title": "Friend Points Gift!",
+      "message": "Here are 10,000 Friend Points from the live server!",
+      "icon_type": 3,
+      "items": [
+        [51, 1, 10000]
+      ]
     }
   ]
 }
