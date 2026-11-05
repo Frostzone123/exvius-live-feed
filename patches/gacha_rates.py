@@ -58,6 +58,7 @@ def selectable_units():
         named = named_unit_ids()
         units = []
         seen = set()
+        from player_state import unit_mst
         for r_str, label in (('7', 'NV'), ('5', '5★')):
             for uid in roots.get(r_str, []):
                 uid_str = str(uid)
@@ -73,11 +74,15 @@ def selectable_units():
                 if not name or name.lower().startswith('dummy') or name.lower().startswith('test'):
                     continue
                 seen.add(uid_str)
+                mst = unit_mst(uid_str) or {}
+                is_nv_plus = (r_str == '7' and str(mst.get('5Mgpv8hJ')) == '2')
+                u_label = 'NV+' if is_nv_plus else label
+                u_rnum = 8 if is_nv_plus else int(r_str)
                 units.append({
                     'id': uid_str,
                     'name': name,
-                    'rarity': label,
-                    'rarity_num': int(r_str)
+                    'rarity': u_label,
+                    'rarity_num': u_rnum
                 })
         if len(units) < 20:
             import json
@@ -95,8 +100,10 @@ def selectable_units():
                         if uid_str not in seen:
                             name = unit_name(uid_str) or f"Neo Vision {uid_str}"
                             seen.add(uid_str)
-                            units.append({'id': uid_str, 'name': name, 'rarity': 'NV', 'rarity_num': 7})
-        units.sort(key=lambda u: (0 if u['rarity'] == 'NV' else 1, u['name'].lower()))
+                            mst = unit_mst(uid_str) or {}
+                            is_nv_plus = (str(mst.get('5Mgpv8hJ')) == '2')
+                            units.append({'id': uid_str, 'name': name, 'rarity': 'NV+' if is_nv_plus else 'NV', 'rarity_num': 8 if is_nv_plus else 7})
+        units.sort(key=lambda u: (0 if u['rarity'] == 'NV+' else (1 if u['rarity'] == 'NV' else 2), u['name'].lower()))
         return units
     except Exception:
         return [
@@ -152,6 +159,7 @@ def _custom_stepup_picker_html(current_pool):
         <input type="text" id="unitSearchInput" placeholder="🔍 Search character by name or ID..." oninput="applyUnitFilter()">
         <div class="filter-pills">
             <button type="button" class="pill-btn active" id="pillAll" onclick="selectRarityFilter('all')">All ({len(units)})</button>
+            <button type="button" class="pill-btn" id="pillNVPlus" onclick="selectRarityFilter('NV+')">NV+ ({len([u for u in units if u['rarity'] == 'NV+'])})</button>
             <button type="button" class="pill-btn" id="pillNV" onclick="selectRarityFilter('NV')">NV ({len([u for u in units if u['rarity'] == 'NV'])})</button>
             <button type="button" class="pill-btn" id="pill5" onclick="selectRarityFilter('5★')">5★ ({len([u for u in units if u['rarity'] == '5★'])})</button>
         </div>
@@ -197,7 +205,7 @@ def _custom_stepup_picker_html(current_pool):
         const pills = [];
         activePool.forEach(id => {{
             const u = unitMap[id] || {{ id: id, name: 'Unit ' + id, rarity: 'NV' }};
-            const badgeCls = u.rarity === 'NV' ? 'badge-nv' : 'badge-star5';
+            const badgeCls = u.rarity === 'NV+' ? 'badge-nvplus' : (u.rarity === 'NV' ? 'badge-nv' : 'badge-star5');
             pills.push(
                 '<div class="pool-pill">' +
                     '<span class="badge ' + badgeCls + '">' + u.rarity + '</span>' +
@@ -253,6 +261,7 @@ def _custom_stepup_picker_html(current_pool):
         activeRarity = rarity;
         document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
         if (rarity === 'all') document.getElementById('pillAll').classList.add('active');
+        else if (rarity === 'NV+') document.getElementById('pillNVPlus').classList.add('active');
         else if (rarity === 'NV') document.getElementById('pillNV').classList.add('active');
         else document.getElementById('pill5').classList.add('active');
         applyUnitFilter();
@@ -277,7 +286,7 @@ def _custom_stepup_picker_html(current_pool):
 
         list.innerHTML = filtered.map(u => {{
             const inPool = activePool.has(u.id);
-            const badgeCls = u.rarity === 'NV' ? 'badge-nv' : 'badge-star5';
+            const badgeCls = u.rarity === 'NV+' ? 'badge-nvplus' : (u.rarity === 'NV' ? 'badge-nv' : 'badge-star5');
             return '<div class="unit-item' + (inPool ? ' in-pool-row' : '') + '">' +
                 '<div class="unit-left">' +
                     '<span class="badge ' + badgeCls + '">' + u.rarity + '</span>' +
@@ -394,6 +403,7 @@ def page(banner_id):
             '.clear-pool-btn:hover{background:#e53935;color:white}'
             '.empty-pool-notice{color:#8bb1db;font-size:13px;padding:4px 0}'
             '.badge{display:inline-block;padding:3px 8px;font-size:12px;font-weight:bold;border-radius:4px;text-shadow:0 1px 2px rgba(0,0,0,0.5)}'
+            '.badge-nvplus,.badge.nvplus{background:linear-gradient(135deg,#7b1fa2,#00e5ff);color:white;box-shadow:0 0 6px rgba(0,229,255,0.6)}'
             '.badge-nv,.badge.nv{background:linear-gradient(135deg,#e91e63,#9c27b0);color:white}'
             '.badge-star5,.badge.star5{background:linear-gradient(135deg,#fbc02d,#f57c00);color:black}'
             '.filter-toolbar{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}'

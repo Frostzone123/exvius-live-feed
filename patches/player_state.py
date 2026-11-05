@@ -1276,15 +1276,17 @@ def effect_pattern_for(rarity, gacha_id=None) -> str | None:
     crystal_ids = ids_for(is_crystal_pattern)
     if crystal_ids:
         # Canonical crystal animations:
+        # Rarity 8 (NV+): pattern 6228 (blocks 8881,8882,8894: gacha_r4_c4_nvplus / NV+ crystal)
         # Rarity 7 (NV): pattern 35 (blocks 8881,8882,8884: gacha_rarenv / red crystal)
-        # Rarity 8 (NV+): pattern 6224 (NV+ crystal)
         # Rarity 5 (Rainbow): pattern 9 (blocks 4441,4442,4444: gacha_rare5 / rainbow crystal)
         try:
             r_int = int(rarity)
+            if r_int >= 8 and 6228 in crystal_ids:
+                return "6228"
+            if r_int >= 8 and 6224 in crystal_ids:
+                return "6224"
             if r_int == 7 and 35 in crystal_ids:
                 return "35"
-            if r_int == 8 and 6224 in crystal_ids:
-                return "6224"
             if r_int == 5 and 9 in crystal_ids:
                 return "9"
         except (ValueError, TypeError):
@@ -4048,8 +4050,9 @@ class PlayerState:
         if granted_rarity is None:
             granted_rarity = int((unit_mst(master_id) or {}).get("9fW0TePj", 1) or 1)
         granted = self.grant_unit(master_id, granted_rarity=int(granted_rarity))
+        eff_rarity = 8 if str((unit_mst(master_id) or {}).get("5Mgpv8hJ")) == "2" else int(granted_rarity)
         result = {"unit_id": str(master_id), "granted_rarity": int(granted_rarity),
-                  "pattern_id": effect_pattern_for(granted_rarity),
+                  "pattern_id": effect_pattern_for(eff_rarity),
                   "instance_id": (granted or {}).get("instance_id"),
                   "level": int((granted or {}).get("level") or 1)}
         if granted is not None:
@@ -4391,7 +4394,15 @@ class PlayerState:
         st = self.banner_state(state_id)
         st["term_exe_count"] += repeats
         st["total_exe_count"] += repeats
-        top = max((int(a["granted_rarity"] or 1) for a in granted), default=1)
+        def _effective_rarity(award):
+            mid = str(award.get("unit_id") or "")
+            mst = unit_mst(mid) or {}
+            # In F_UNIT_MST, 5Mgpv8hJ is nvType: '2' represents Neo Vision Plus (NV+)
+            if str(mst.get("5Mgpv8hJ")) == "2":
+                return 8
+            return int(award.get("granted_rarity") or mst.get("9fW0TePj") or 1)
+
+        top = max((_effective_rarity(a) for a in granted), default=1)
         result = {"banner_id": str(banner["id"]), "detail_id": str(banner.get("detail_id", "")),
                   "step": step_index, "count": draws, "repeats": repeats, "ticket_id": spent_ticket,
                   "awards": granted, "nv_cards": nv_cards, "bonus_awards": bonus_awards,
