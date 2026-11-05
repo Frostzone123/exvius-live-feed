@@ -271,69 +271,115 @@ def all_banners() -> list:
         by_id[str(b["id"])] = b
     for b in authored_banners():
         bid = str(b.get("id"))
-        if bid == "9900001":
-            pool_ids = []
-            if st.State.player:
-                pool_ids = list(st.State.player.data.get("custom_stepup_pool") or [])
-                if not pool_ids and st.State.player.data.get("custom_stepup_unit"):
-                    pool_ids = [str(st.State.player.data["custom_stepup_unit"])]
-            nv_rateups = []
-            star5_rateups = []
-            # Normalize any Brave Shift IDs (...17) to base summonable IDs (...07)
-            norm_ids = []
-            for uid in pool_ids:
-                u_s = str(uid)
-                if u_s.endswith("17") and len(u_s) >= 9:
-                    u_s = u_s[:-2] + "07"
-                if u_s not in norm_ids:
-                    norm_ids.append(u_s)
-            pool_ids = norm_ids
-            try:
-                from player_state import unit_mst
-                for uid in pool_ids:
-                    u_str = str(uid)
-                    u_info = unit_mst(u_str) or {}
-                    rarity = int(u_info.get("9fW0TePj") or 7)
-                    if rarity == 7:
-                        nv_rateups.append(u_str)
-                    else:
-                        star5_rateups.append(u_str)
-            except Exception:
-                pass
-            has_rateup = bool(nv_rateups or star5_rateups)
-            if not has_rateup:
-                b["locked_no_rateup"] = True
-                b["name"] = "United Forces Step-Up [Locked: Tap Drop Rates]"
-            else:
-                b.pop("locked_no_rateup", None)
-                b["name"] = "United Forces Step-Up Summon"
-            for tier in (b.get("pool") or {}).get("tiers", []):
-                t_rarity = int(tier.get("rarity") or 0)
-                if t_rarity == 7:
-                    tier_units = list(tier.get("units") or [])
-                    if len(tier_units) < 50:
-                        tier_units = list(_NV_POOL_IDS)
-                    if nv_rateups:
-                        tier["featured"] = nv_rateups
-                        tier["featured_share"] = 0.25
-                        for u in nv_rateups:
-                            if u not in tier_units:
-                                tier_units.append(u)
-                    tier["units"] = tier_units
-                elif t_rarity == 5:
-                    tier_units = list(tier.get("units") or [])
-                    if len(tier_units) < 50:
-                        tier_units = list(_STAR5_POOL_IDS)
-                    if star5_rateups:
-                        tier["featured"] = star5_rateups
-                        tier["featured_share"] = 0.25
-                        for u in star5_rateups:
-                            if u not in tier_units:
-                                tier_units.append(u)
-                    tier["units"] = tier_units
-            if nv_rateups and b.get("steps") and len(b["steps"]) >= 6:
-                b["steps"][5]["guarantee"]["any_of"] = nv_rateups
         by_id[bid] = b
+    if "9900001" not in by_id:
+        by_id["9900001"] = {
+            "id": "9900001",
+            "type": "step",
+            "name": "United Forces Step-Up Summon",
+            "historical_name": "United Forces Step-Up Summon",
+            "detail_id": "990000101",
+            "exe_type": "primary",
+            "schedule": {
+                "disp_order": 2005,
+                "banner_type": 0,
+                "window": {"from": "2026-01-01 00:00:00", "to": "2030-12-31 23:59:59"}
+            },
+            "art": {
+                "banner": "baebcb30e5ce42931b56e372607d211c.png",
+                "detail_banner": "baebcb30e5ce42931b56e372607d211c_01.png",
+                "detail_extra": [
+                    "baebcb30e5ce42931b56e372607d211c_02.png",
+                    "baebcb30e5ce42931b56e372607d211c_03.png",
+                    "baebcb30e5ce42931b56e372607d211c_04.png",
+                    "baebcb30e5ce42931b56e372607d211c_05.png",
+                    "baebcb30e5ce42931b56e372607d211c_06.png"
+                ],
+                "anime_file": "gacha_animation",
+                "anime_name": "gacha_moogle_rare/anime",
+                "img_btn": "gacha_btn_n"
+            },
+            "pool": {
+                "tiers": [
+                    {"rarity": 7, "rate": 0.05, "units": list(_NV_POOL_IDS)},
+                    {"rarity": 5, "rate": 0.95, "units": list(_STAR5_POOL_IDS)}
+                ]
+            },
+            "steps": [
+                {"cost": {"kind": "lapis", "amount": 3000}, "draws": 6},
+                {"cost": {"kind": "lapis", "amount": 4000}, "draws": 8},
+                {"cost": {"kind": "lapis", "amount": 4000}, "draws": 9},
+                {"cost": {"kind": "lapis", "amount": 4500}, "draws": 10},
+                {"cost": {"kind": "lapis", "amount": 4500}, "draws": 10},
+                {"cost": {"kind": "lapis", "amount": 5000}, "draws": 11, "guarantee": {"rarity": 7, "count": 1}}
+            ],
+            "gacha_layout": 2,
+            "lap_limit": 0,
+            "source": "authored"
+        }
+    if "9900001" in by_id:
+        b = by_id["9900001"]
+        pool_ids = []
+        if st.State.player:
+            pool_ids = list(st.State.player.data.get("custom_stepup_pool") or [])
+            if not pool_ids and st.State.player.data.get("custom_stepup_unit"):
+                pool_ids = [str(st.State.player.data["custom_stepup_unit"])]
+        nv_rateups = []
+        star5_rateups = []
+        norm_ids = []
+        for uid in pool_ids:
+            u_s = str(uid)
+            if u_s.endswith("17") and len(u_s) >= 9:
+                u_s = u_s[:-2] + "07"
+            if u_s not in norm_ids:
+                norm_ids.append(u_s)
+        pool_ids = norm_ids
+        try:
+            from player_state import unit_mst
+            for uid in pool_ids:
+                u_str = str(uid)
+                u_info = unit_mst(u_str) or {}
+                rarity = int(u_info.get("9fW0TePj") or 7)
+                if rarity == 7:
+                    nv_rateups.append(u_str)
+                else:
+                    star5_rateups.append(u_str)
+        except Exception:
+            pass
+        has_rateup = bool(nv_rateups or star5_rateups)
+        if not has_rateup:
+            b["locked_no_rateup"] = True
+            b["name"] = "United Forces Step-Up [Locked: Tap Drop Rates]"
+        else:
+            b.pop("locked_no_rateup", None)
+            b["name"] = "United Forces Step-Up Summon"
+        for tier in (b.get("pool") or {}).get("tiers", []):
+            t_rarity = int(tier.get("rarity") or 0)
+            if t_rarity == 7:
+                tier_units = list(tier.get("units") or [])
+                if len(tier_units) < 50:
+                    tier_units = list(_NV_POOL_IDS)
+                if nv_rateups:
+                    tier["featured"] = nv_rateups
+                    tier["featured_share"] = 0.60
+                    for u in nv_rateups:
+                        if u not in tier_units:
+                            tier_units.append(u)
+                tier["units"] = tier_units
+            elif t_rarity == 5:
+                tier_units = list(tier.get("units") or [])
+                if len(tier_units) < 50:
+                    tier_units = list(_STAR5_POOL_IDS)
+                if star5_rateups:
+                    tier["featured"] = star5_rateups
+                    tier["featured_share"] = 0.60
+                    for u in star5_rateups:
+                        if u not in tier_units:
+                            tier_units.append(u)
+                tier["units"] = tier_units
+        if nv_rateups and b.get("steps") and len(b["steps"]) >= 6:
+            b["steps"][5]["guarantee"]["any_of"] = nv_rateups
+        by_id["9900001"] = b
     # Archive identity merging shows a replacement and its calendar alias once.
     # Keep both IDs resolvable for requests already issued by an older client.
     only = gacha_only_ids()
