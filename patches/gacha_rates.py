@@ -130,7 +130,7 @@ def _custom_stepup_picker_html(current_pool):
     <h2 style="margin: 6px 0 8px 0; color: #ffe398; font-size: 20px;">Custom Rate-Up Pool Selector</h2>
     <p style="margin: 0 0 14px 0; font-size: 14px; line-height: 1.45; color: #cbe0fc;">
         Add any <strong>Neo Vision (NV)</strong> or <strong>5★ Base</strong> characters below to build your custom rate-up pool!
-        Selected units share a massive <strong>60% rate-up share</strong> on their tier across all 6 steps, and
+        Selected units share a massive <strong>25% rate-up share</strong> on their tier across all 6 steps, and
         <strong style="color: #ffd700;">Step 6 guarantees at least one unit from your custom pool</strong>!
     </p>
 

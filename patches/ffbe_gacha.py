@@ -306,22 +306,38 @@ def all_banners() -> list:
                 b["name"] = "United Forces Step-Up Summon"
             for tier in (b.get("pool") or {}).get("tiers", []):
                 t_rarity = int(tier.get("rarity") or 0)
-                if t_rarity == 7 and nv_rateups:
-                    tier["featured"] = nv_rateups
-                    tier["featured_share"] = 0.60
-                    tier_units = list(tier.get("units") or [])
-                    for u in nv_rateups:
-                        if u not in tier_units:
-                            tier_units.append(u)
-                    tier["units"] = tier_units
-                elif t_rarity == 5 and star5_rateups:
-                    tier["featured"] = star5_rateups
-                    tier["featured_share"] = 0.60
-                    tier_units = list(tier.get("units") or [])
-                    for u in star5_rateups:
-                        if u not in tier_units:
-                            tier_units.append(u)
-                    tier["units"] = tier_units
+                if t_rarity == 7:
+                    if nv_rateups:
+                        tier["featured"] = nv_rateups
+                        tier["featured_share"] = 0.25
+                        tier_units = list(tier.get("units") or [])
+                        for u in nv_rateups:
+                            if u not in tier_units:
+                                tier_units.append(u)
+                        tier["units"] = tier_units
+                elif t_rarity == 5:
+                    if not tier.get("units"):
+                        try:
+                            from pathlib import Path
+                            named_path = Path(__file__).with_name("gacha_named.json")
+                            if named_path.exists():
+                                with open(named_path, encoding="utf-8") as nf:
+                                    nd = json.load(nf)
+                                b_named = next((x for x in nd.get("banners", []) if x.get("id") == "9300001"), None)
+                                if b_named:
+                                    t5 = next((t for t in (b_named.get("pool") or {}).get("tiers", []) if t.get("rarity") == 5), None)
+                                    if t5 and t5.get("units"):
+                                        tier["units"] = list(t5["units"])
+                        except Exception:
+                            pass
+                    if star5_rateups:
+                        tier["featured"] = star5_rateups
+                        tier["featured_share"] = 0.25
+                        tier_units = list(tier.get("units") or [])
+                        for u in star5_rateups:
+                            if u not in tier_units:
+                                tier_units.append(u)
+                        tier["units"] = tier_units
             if nv_rateups and b.get("steps") and len(b["steps"]) >= 6:
                 b["steps"][5]["guarantee"]["any_of"] = nv_rateups
         by_id[bid] = b
