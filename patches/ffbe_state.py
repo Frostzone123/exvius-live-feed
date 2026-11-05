@@ -284,6 +284,8 @@ def repair_legacy_resource_skips(player, available):
     if ledger.get('complete'):
         return
     path = Path(__file__).with_name('content') / 'legacy_resource_skips.json'
+    if not path.is_file():
+        path = Path(HERE) / 'content' / 'legacy_resource_skips.json'
     flags = json.loads(path.read_text(encoding='utf8'))['switches']
     positions = {flag: switch_position(flag) for flag in flags}
     signature = {}

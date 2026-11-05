@@ -38,7 +38,8 @@ _GLOBAL_BUNDLES = []
 def _global_bundles():
     """The Global Premium Bundles from global_bundles.json (loaded once)."""
     if not _GLOBAL_BUNDLES:
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'global_bundles.json')
+        local = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'global_bundles.json')
+        path = local if os.path.isfile(local) else os.path.join(HERE, 'global_bundles.json')
         with open(path, encoding='utf-8') as fh:
             _GLOBAL_BUNDLES.extend(json.load(fh)['bundles'])
     return _GLOBAL_BUNDLES
@@ -1701,7 +1702,8 @@ def daily_quest_catalogue() -> dict:
     global _DQ_CATALOGUE
     if _DQ_CATALOGUE is not None:
         return _DQ_CATALOGUE
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "daily_quests.json")
+    local = os.path.join(os.path.dirname(os.path.abspath(__file__)), "daily_quests.json")
+    path = local if os.path.isfile(local) else os.path.join(HERE, "daily_quests.json")
     try:
         with open(path, encoding="utf-8") as fh:
             doc = json.load(fh)
