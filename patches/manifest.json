@@ -18,7 +18,7 @@
     {
       "name": "gacha_rates.py",
       "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_rates.py",
-      "sha256": "3e3fbd7a55345874d5ba4a2a2d8d25593a2e29654e7cd4c67992274cfd267725"
+      "sha256": "30243ec5d97a3cc8a68874d7bd62ab74228856a186b0b358aeb2add3dc7f639a"
     },
     {
       "name": "player_state.py",
