@@ -71,7 +71,24 @@ def wire_type(banner, code):
 
 
 def _standard_families():
-    doc = json.loads(Path(__file__).with_name('gacha_standard.json').read_text(encoding='utf-8'))
+    candidates = [
+        Path(__file__).with_name('gacha_standard.json'),
+        Path(__file__).parent.parent / 'gacha_standard.json',
+        Path(__file__).parent.parent / 'data' / 'static' / 'gacha_standard.json',
+    ]
+    try:
+        import exvius_pack
+        candidates.append(Path(exvius_pack.__file__).parent / 'gacha_standard.json')
+    except Exception:
+        pass
+    doc = {}
+    for c in candidates:
+        if c.is_file():
+            try:
+                doc = json.loads(c.read_text(encoding='utf-8'))
+                break
+            except Exception:
+                pass
     return {str(row['id']) for row in doc.get('banners', [])}
 
 
