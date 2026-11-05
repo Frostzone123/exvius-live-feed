@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "mails": [
+    {
+      "mail_id": "frost_welcome_001",
+      "title": "Welcome to Frost's Server!",
+      "message": "Live Mailbox & OTA Update Feed Connected!",
+      "icon_type": 2,
+      "items": [
+        [50, 1, 5000]
+      ]
+    }
+  ]
+}
