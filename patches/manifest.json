@@ -32,8 +32,8 @@
     },
     {
       "name": "player_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=18",
-      "sha256": "e77545a9d4f5c6003effe2fa968e4e886e5278e0e9a50d5a00083e46f09fb6e2"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=19",
+      "sha256": "1cf3060b7121476a50331297db399948437ef4bd818c70723e7ba56a4efe1aeb"
     }
   ]
 }
