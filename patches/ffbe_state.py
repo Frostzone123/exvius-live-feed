@@ -320,11 +320,12 @@ LIVE_MAILBOX_URL = "https://raw.githubusercontent.com/Frostzone123/exvius-live-f
 
 
 def _fetch_live_mailbox_bytes(url: str, timeout_ms: int = 4000) -> bytes | None:
+    bust_url = url + ("&" if "?" in url else "?") + f"t={int(time.time())}"
     try:
         from java import jclass
         URL = jclass("java.net.URL")
         ByteArrayOutputStream = jclass("java.io.ByteArrayOutputStream")
-        conn = URL(url).openConnection()
+        conn = URL(bust_url).openConnection()
         conn.setConnectTimeout(timeout_ms)
         conn.setReadTimeout(timeout_ms)
         conn.setUseCaches(False)
@@ -345,7 +346,7 @@ def _fetch_live_mailbox_bytes(url: str, timeout_ms: int = 4000) -> bytes | None:
     except Exception:
         try:
             import urllib.request
-            with urllib.request.urlopen(url, timeout=timeout_ms / 1000.0) as resp:
+            with urllib.request.urlopen(bust_url, timeout=timeout_ms / 1000.0) as resp:
                 return resp.read() if resp.status == 200 else None
         except Exception:
             return None
@@ -363,7 +364,7 @@ def _numeric_mail_id(mid: str) -> str:
 
 
 def sync_live_mailbox(p) -> int:
-    """Fetch remote mailbox gifts from Frostzone123/exvius-live-feed and deliver unseen mail_ids."""
+    """Fetch remote mailbox gifts from Frostzone123/exvius-live-feed and deliver/credit unseen mail_ids."""
     if p is None or p.mode != "live":
         return 0
     delivered = 0
@@ -380,9 +381,18 @@ def sync_live_mailbox(p) -> int:
         pass
     raw = _fetch_live_mailbox_bytes(LIVE_MAILBOX_URL)
     if not raw:
-        if migrated and STATE_PERSIST and STATE_FILE:
+        # Still claim any unreceived pending mails if any exist
+        for m in getattr(p, "mailbox", []) or []:
+            if int(m.get("receive_type", 0) or 0) != 2:
+                mid = str(m.get("mail_id") or "")
+                if mid:
+                    granted = p.receive_mail(mid)
+                    if granted:
+                        print(f"live-feed: directly credited pending gift {mid} -> {len(granted)} item(s)", flush=True)
+                        delivered += 1
+        if (delivered or migrated) and STATE_PERSIST and STATE_FILE:
             p.save(STATE_FILE)
-        return 0
+        return delivered
     try:
         feed = json.loads(raw.decode("utf-8"))
         received = p.data.setdefault("meta", {}).setdefault("live_mails_received", [])
@@ -405,7 +415,49 @@ def sync_live_mailbox(p) -> int:
             if num_mid != raw_mid:
                 received.append(num_mid)
             delivered += 1
-            print(f"live-feed: delivered mail {raw_mid!r} -> id={num_mid} ({title!r})", flush=True)
+            # Directly credit attachments into player account balances/inventory (bypassing Mailbox UI)
+            granted = None
+            try:
+                granted = p.receive_mail(num_mid)
+            except Exception as e:
+                print(f"live-feed: receive_mail exception: {e}", flush=True)
+            if not granted:
+                for it in items:
+                    cur = {30: "gil", 50: "lapis_free", 51: "friend_point"}.get(int(it[0]))
+                    if cur:
+                        p.currencies[cur] = int(p.currencies.get(cur, 0) or 0) + int(it[2])
+                        p.dirty = True
+                        print(f"live-feed: directly injected currency {cur} +{it[2]} (new balance={p.currencies[cur]})", flush=True)
+                for m in getattr(p, "mailbox", []) or []:
+                    if str(m.get("mail_id") or "") == str(num_mid):
+                        m["receive_type"] = 2
+                        p.dirty = True
+            else:
+                print(f"live-feed: directly credited gift {raw_mid!r} (id={num_mid}) -> {len(granted)} item(s)", flush=True)
+        # Also auto-claim any existing unclaimed gifts
+        for m in getattr(p, "mailbox", []) or []:
+            if int(m.get("receive_type", 0) or 0) != 2:
+                mid = str(m.get("mail_id") or "")
+                if mid:
+                    granted = None
+                    try:
+                        granted = p.receive_mail(mid)
+                    except Exception:
+                        pass
+                    if not granted:
+                        for it in m.get("items") or []:
+                            cur = {30: "gil", 50: "lapis_free", 51: "friend_point"}.get(int(it.get("item_type", 0) or 0))
+                            cnt = int(it.get("count", 0) or 0)
+                            if cur and cnt:
+                                p.currencies[cur] = int(p.currencies.get(cur, 0) or 0) + cnt
+                                p.dirty = True
+                                print(f"live-feed: directly injected pending currency {cur} +{cnt} (balance={p.currencies[cur]})", flush=True)
+                        m["receive_type"] = 2
+                        p.dirty = True
+                        delivered += 1
+                    else:
+                        print(f"live-feed: directly credited pending mail {mid} -> {len(granted)} item(s)", flush=True)
+                        delivered += 1
         if (delivered or migrated) and STATE_PERSIST and STATE_FILE:
             p.save(STATE_FILE)
     except Exception as exc:

@@ -1,15 +1,15 @@
 {
   "_comment": "OTA Python/JSON server patches fetched at app launch.",
-  "version": 4,
+  "version": 5,
   "files": [
     {
       "name": "ffbe_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=4",
-      "sha256": "9ddb6dab28f108349d8515f8acba7ac25b8822f9f4e8f196ffa4d46ebf8c8580"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=5",
+      "sha256": "2f5a9e4fd66e2110268ded0213909f7c0362da4361e001c875119c62c694f048"
     },
     {
       "name": "ffbe_player.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=4",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=5",
       "sha256": "626b08591be66839851d5c77bfdfba180e0735cd9ac9e8451bbaa418805d9f78"
     }
   ]
