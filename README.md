@@ -1,6 +1,11 @@
 # Exvius Live Feed (`Frostzone123/exvius-live-feed`)
 
-Lightweight live-configuration feed for custom **In-Game Mailbox Gifts**, **Over-the-Air (OTA) Server Hot-Patches**, and **App Update Manifests**.
+Lightweight live-configuration feed for custom **In-Game Mailbox Gifts**, **Over-the-Air (OTA) Server Hot-Patches**, and **Patched APK Releases**.
+
+## Direct APK Downloads (`v0.1.21-patched`)
+- **[Download Standard Patched APK (`exvius-offline-v0.1.21-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.21-patched/exvius-offline-v0.1.21-patched.apk)** — Vanilla starting Lapis/Gil + all Emulator & Android 13–16 fixes + Live Mailbox/OTA feed.
+- **[Download Bonus Patched APK (`exvius-offline-v0.1.21-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.21-patched/exvius-offline-v0.1.21-patched-bonus.apk)** — Includes a one-time **9,000,000 Lapis + 100,000,000 Gil** starter bonus + all fixes + Live Mailbox/OTA feed.
+- **[View Release Notes](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.21-patched)**
 
 ---
 
