@@ -140,13 +140,5 @@
   ],
   "downloadBytes": 14647871919,
   "installedBytes": 14948691529,
-  "files": 12487,
-  "app": {
-    "version": "0.1.23",
-    "versionName": "9.0.0-offline.23",
-    "versionCode": 9024,
-    "url": "https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk",
-    "size": 151267444,
-    "sha256": "42e5c53c73dfb2f590370f99233af00af1ff39bfeda522e983c4c0447c5d2517"
-  }
+  "files": 12487
 }

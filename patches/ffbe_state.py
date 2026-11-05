@@ -505,6 +505,14 @@ def load_state() -> None:
         print(f"state: granted one-time 100,000,000 starter gil (new balance={p.currencies['gil']})", flush=True)
     if STATE_PERSIST and STATE_FILE:
         sync_live_mailbox(p)
+    try:
+        from java import jclass
+        bridge = jclass('com.exvius.local.LocalGameBridge')
+        if bridge.context is not None:
+            prefs = bridge.context.getSharedPreferences('offline_updates', 0)
+            prefs.edit().remove('pending_apk').remove('pending_apk_version').commit()
+    except Exception:
+        pass
     if p.mode == "live":
         g = p.data.setdefault("gacha", {})
         if g.get("completed_laps"):
