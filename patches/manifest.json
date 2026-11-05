@@ -2,58 +2,58 @@
   "files": [
     {
       "name": "capture_server.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/capture_server.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/capture_server.py?v=24",
       "sha256": "3a988c42b8963379d5527eb7078da74fa8fb563f311645c79db677e6b9f0bb42"
     },
     {
       "name": "ffbe_gacha.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py?v=24",
       "sha256": "f34589a7bf98fa64bea26750264209bbf2177727af3165255b26b56ff2755252"
     },
     {
       "name": "ffbe_player.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=24",
       "sha256": "829c7ef43534c55fb1aab2f8902aaa9bd1d2d7ad7ad5bf1731a1b02784d7e314"
     },
     {
       "name": "ffbe_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=24",
       "sha256": "da8f1701ff9a37cea3e377b0b2b1d9217fa29dd0f75816cec5284f55c5f3904a"
     },
     {
       "name": "gacha_archive.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_archive.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_archive.py?v=24",
       "sha256": "0d3a53e817e4ded83446b3bfa53dabe153f7aa1fdbf7e83df5770e145341d5fa"
     },
     {
       "name": "gacha_rates.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_rates.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_rates.py?v=24",
       "sha256": "1e7df7752ef049f0152b0710ecce2b1b8d0750e75f375e113352feebfe4a4ebc"
     },
     {
       "name": "player_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=24",
       "sha256": "c7bad8b863ecfb257f1610863ebf2477968d3ca9ba60c046c4979f3282071b9c"
     },
     {
       "name": "gacha_standard.json",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_standard.json?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_standard.json?v=24",
       "sha256": "78265aeda90e46d197d660364e9e6304f4097db54019ef16bdff46205152ec13"
     },
     {
       "name": "gacha_box.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_box.py?v=23",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/gacha_box.py?v=24",
       "sha256": "90c88a6345fee528d33f15a3a7bf472f66d36068290d0460f415b6deca1438fa"
     },
     {
       "name": "ffbe_friends.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_friends.py?v=23",
-      "sha256": "480b7a336b94f72a6d74aba80e6c0148ddbb7512be65e0a9d5165178b9dcd1c8"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_friends.py?v=24",
+      "sha256": "dea60ac4e7224a0f57771055e3dedd816bdcef53d261dddfd4394559b935fbf0"
     },
     {
       "name": "friends.yaml",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/friends.yaml?v=23",
-      "sha256": "7869962350a269f600eeedd25f00e715bdd491ab73fc5ce0c29a4d7c7122ad26"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/friends.yaml?v=24",
+      "sha256": "42f9d297b7940669a7d33fec95a9675b2839e020b696b679668a8b9408f651b4"
     }
   ]
 }

@@ -129,8 +129,171 @@ def _entry(index: int, raw: dict) -> dict:
     }
 
 
+def get_player_companions(tab: str = "1") -> list:
+    """Build the companion roster from the player's own units.
+    
+    Display Name: Frostzn
+    Rank: 1000
+    
+    Candidate source priority:
+    1. companion_deck: explicitly chosen companion units
+    2. Active party deck members
+    3. Other party deck members (Parties 1..10)
+    4. Favorited units (favourite == 1)
+    5. Top NV+/NV units from roster to fill up to 10 choices
+    """
+    from ffbe_state import State
+    if State.player is None or not getattr(State.player, "data", None):
+        return []
+    data = State.player.data
+    roster = data.get("roster", [])
+    if not roster:
+        return []
+
+    roster_by_id = {str(u.get("instance_id")): u for u in roster if isinstance(u, dict) and u.get("instance_id")}
+
+    chosen_iids = []
+    seen_masters = set()
+
+    def try_add(iid):
+        iid_str = str(iid)
+        if iid_str in roster_by_id and iid_str not in chosen_iids:
+            u = roster_by_id[iid_str]
+            mid = str(u.get("master_id", ""))
+            if mid not in seen_masters:
+                seen_masters.add(mid)
+                chosen_iids.append(iid_str)
+                return True
+        return False
+
+    comp_deck = data.get("companion_deck")
+    if isinstance(comp_deck, list):
+        for iid in comp_deck:
+            try_add(iid)
+    elif isinstance(comp_deck, dict):
+        for slot in sorted(comp_deck.keys()):
+            try_add(comp_deck[slot])
+
+    party = data.get("party", {})
+    active_idx = int(party.get("active_deck") or 0)
+    decks = party.get("decks", [])
+    if isinstance(decks, list) and 0 <= active_idx < len(decks):
+        for m in decks[active_idx].get("members", []):
+            try_add(m.get("instance_id"))
+
+    if isinstance(decks, list):
+        for idx, d in enumerate(decks):
+            if idx == active_idx:
+                continue
+            for m in d.get("members", []):
+                try_add(m.get("instance_id"))
+
+    for u in roster:
+        if u.get("favourite"):
+            try_add(u.get("instance_id"))
+
+    if len(chosen_iids) < 10:
+        remaining = [u for u in roster if str(u.get("instance_id")) not in chosen_iids]
+        def unit_sort_key(u):
+            mid = str(u.get("master_id", ""))
+            is_nv_plus = mid.endswith("27")
+            is_nv = mid.endswith("7")
+            lvl = int(u.get("level") or 1)
+            try:
+                numeric_mid = int(mid)
+            except ValueError:
+                numeric_mid = 0
+            return (1 if is_nv_plus else 0, 1 if is_nv else 0, lvl, numeric_mid)
+
+        remaining.sort(key=unit_sort_key, reverse=True)
+        for u in remaining:
+            if len(chosen_iids) >= 10:
+                break
+            try_add(u.get("instance_id"))
+
+    if not chosen_iids:
+        return []
+
+    friends = []
+    esper_map = {}
+    beast_decks = data.get("beast_decks", {})
+    if isinstance(decks, list):
+        for d_idx, d in enumerate(decks):
+            b_list = beast_decks.get(str(d_idx), [])
+            for s_idx, m in enumerate(d.get("members", [])):
+                iid_str = str(m.get("instance_id"))
+                if s_idx < len(b_list) and b_list[s_idx]:
+                    esper_map[iid_str] = int(b_list[s_idx])
+
+    vc_id_map = {}
+    for vc in data.get("vision_cards") or []:
+        if isinstance(vc, dict) and vc.get("user_vc_id"):
+            vc_id_map[str(vc["user_vc_id"])] = str(vc.get("vc_id", ""))
+
+    emblem_id = int(data.get("identity", {}).get("emblem_id") or 0)
+
+    for idx, iid in enumerate(chosen_iids):
+        u = roster_by_id[iid]
+        mid = int(u["master_id"])
+        lvl = max(1, int(u.get("level") or 1))
+        lb_lvl = max(1, int(u.get("lb_level") or (1 if limit_burst(mid) else 0)))
+        lb_exp = int(u.get("lb_exp") or 0)
+
+        eq_raw = u.get("equipment") or {}
+        if isinstance(eq_raw, dict):
+            equipment = [str(eq_raw.get(str(i + 1), "0")) for i in range(6)]
+        elif isinstance(eq_raw, list):
+            equipment = [str(x) for x in eq_raw][:6] + ["0"] * max(0, 6 - len(eq_raw))
+        else:
+            equipment = ["0"] * 6
+
+        materia_raw = u.get("materia") or []
+        abilities = [str(x) for x in materia_raw][:4] + ["0"] * max(0, 4 - len(materia_raw))
+
+        raw_vc = str(u.get("vision_card") or "")
+        vc_id = vc_id_map.get(raw_vc, raw_vc)
+
+        esper_id = esper_map.get(iid, 0)
+        esper_rarity = 3
+        esper_level = 60
+        if esper_id:
+            for b in data.get("beasts") or []:
+                if isinstance(b, dict) and int(b.get("beast_id") or 0) == esper_id:
+                    esper_rarity = int(b.get("rarity") or 3)
+                    esper_level = int(b.get("level") or 60)
+                    break
+
+        friend_id = 900000001 + idx
+        friends.append({
+            "display_name": "Frostzn",
+            "friend_id": friend_id,
+            "emblem_id": emblem_id,
+            "rank": 1000,
+            "instance_id": str(friend_id * 10 + 1),
+            "tab": tab,
+            "unit": {
+                "master_id": mid,
+                "level": lvl,
+                "lb_level": lb_lvl,
+                "lb_exp": lb_exp,
+                "vision_card": vc_id,
+                "esper": esper_id,
+                "esper_rarity": esper_rarity,
+                "esper_level": esper_level,
+                "abilities": abilities,
+                "equipment": equipment,
+            }
+        })
+    return friends
+
+
 def load_friends(path: str | None = None) -> list:
-    """friends.yaml, re-read whenever its mtime changes. A missing file means no friends, not an error."""
+    """friends.yaml, re-read whenever its mtime changes. Prefers player's own companion roster."""
+    from ffbe_state import State
+    if State.player is not None and getattr(State.player, "data", None):
+        dynamic = get_player_companions()
+        if dynamic:
+            return dynamic
     candidates = [
         path,
         os.environ.get("FRIENDS_FILE"),
@@ -194,7 +357,7 @@ def _reinforce_row(f: dict) -> dict:
             "%d-0" % (i + 1) for i in range(4)),
         "93Y6evuT": "@".join("%d-%s" % (i + 1, e) for i, e in enumerate(u["equipment"])) or "@".join(
             "%d-0" % (i + 1) for i in range(6)),
-        Y58ENcB4_KEY: "1",                      # the selected friend tab, echoed as sent
+        Y58ENcB4_KEY: str(f.get("tab") or "1"),                      # the selected friend tab, echoed as sent
         "L8d0fqpT": str(f["rank"]),      # TeamLv -- what the client shows as the friend Rank
         "9Tbns0eI": str(f["friend_id"]),        # commits the object (the row's owning user)
         # DELIBERATELY OMITTED unless the YAML sets them: 5giCMUd2/nQ1iAGf3 (vision card),
@@ -245,7 +408,7 @@ def _vc_info_row(f: dict, vc_id) -> dict:
         VCINFO_KEY_TOKEN: _vc_key(f, vc_id),    # the row key the support row points at
         "m3Wghr1j": str(f["friend_id"]),        # FriendId
         "og2GHy49": f["instance_id"],           # UserUnitId
-        Y58ENcB4_KEY: "1",                      # the friend tab, echoed
+        Y58ENcB4_KEY: str(f.get("tab") or "1"),                      # the friend tab, echoed
         VCINFO_LEVEL_TOKEN: str(max(1, level)), # Level (>= 1, mandatory)
         "B6H34Mea": "0",                        # Exp
         "X9ABM7En": "0",                        # TotalExp
@@ -285,9 +448,19 @@ def serve_friends(spec, reply_id=None):
         # Populate its local list during startup as well as on explicit reads.
         return serve_friends(spec, FRIENDLIST_REPLY)
     if reply_id == REINFORCE_REPLY and isinstance(spec, dict):
-        spec[REINFORCE_TAG] = [_reinforce_row(f) for f in friends]
+        reinforce_rows = []
+        for tab_no in ("1", "2", "3", "4", "5"):
+            for f in friends:
+                f_tab = dict(f, tab=tab_no)
+                f_tab["instance_id"] = str(f["friend_id"] * 100 + int(tab_no) * 10 + 1)
+                reinforce_rows.append(_reinforce_row(f_tab))
+        spec[REINFORCE_TAG] = reinforce_rows
         # The card list the support screen resolves through. Its own tag, NON-clearing (see VCINFO_TAG).
-        cards = [_vc_info_row(f, f["unit"]["vision_card"]) for f in friends if f["unit"]["vision_card"]]
+        cards = []
+        for r in reinforce_rows:
+            f_match = next((f for f in friends if str(f["friend_id"]) == r["m3Wghr1j"]), None)
+            if f_match and f_match["unit"]["vision_card"]:
+                cards.append(_vc_info_row(dict(f_match, instance_id=r["og2GHy49"], tab=r["Y58ENcB4"]), f_match["unit"]["vision_card"]))
         if cards:
             spec[VCINFO_TAG] = cards
         # pzf5se6V is the CLEARING variant - deliberately left alone (it empties the container).
