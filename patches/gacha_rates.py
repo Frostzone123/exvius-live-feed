@@ -52,21 +52,38 @@ def _table(pool, mixed=False):
 
 def selectable_units():
     try:
-        from player_state import unit_roots_by_rarity, named_unit_ids
+        from player_state import _load_ndjson, unit_roots_by_rarity, named_unit_ids, unit_mst
         from ffbe_gacha import unit_name
-        roots = unit_roots_by_rarity()
-        named = named_unit_ids()
         units = []
         seen = set()
-        from player_state import unit_mst
+
+        # 1. Base NV+ units (5Mgpv8hJ == '2' and ending in '27')
+        mst_rows = _load_ndjson("F_UNIT_MST.ndjson").get("__rows__", [])
+        for r in mst_rows:
+            if str(r.get("5Mgpv8hJ")) == "2":
+                uid_str = str(r.get("3HriTp6B", ""))
+                if uid_str.endswith("27") and uid_str not in seen:
+                    seen.add(uid_str)
+                    name = unit_name(uid_str) or r.get("G4L0YIB2", "")
+                    units.append({
+                        'id': uid_str,
+                        'name': name,
+                        'rarity': 'NV+',
+                        'rarity_num': 8
+                    })
+
+        # 2. Standard NV and 5★ base units
+        roots = unit_roots_by_rarity()
+        named = named_unit_ids()
         for r_str, label in (('7', 'NV'), ('5', '5★')):
             for uid in roots.get(r_str, []):
                 uid_str = str(uid)
                 if uid_str.startswith('9') or uid_str in seen:
                     continue
-                # For NV units, the summonable base form has form index '0' before rarity '7' (e.g. ...07)
-                # Transformed Brave Shift forms end in 17, 27, etc. and are battle stances, not summonable units.
                 if r_str == '7' and len(uid_str) >= 2 and uid_str[-2] != '0':
+                    continue
+                # If this NV character has an NV+ form already in seen (uid_str[:-2] + '27'), skip pre-NV+ form
+                if (uid_str[:-2] + '27') in seen:
                     continue
                 if named and uid_str not in named:
                     continue
@@ -74,43 +91,44 @@ def selectable_units():
                 if not name or name.lower().startswith('dummy') or name.lower().startswith('test'):
                     continue
                 seen.add(uid_str)
-                mst = unit_mst(uid_str) or {}
-                is_nv_plus = (r_str == '7' and str(mst.get('5Mgpv8hJ')) == '2')
-                u_label = 'NV+' if is_nv_plus else label
-                u_rnum = 8 if is_nv_plus else int(r_str)
                 units.append({
                     'id': uid_str,
                     'name': name,
-                    'rarity': u_label,
-                    'rarity_num': u_rnum
+                    'rarity': label,
+                    'rarity_num': int(r_str)
                 })
+
         if len(units) < 20:
-            import json
-            named_json_path = Path(__file__).with_name('gacha_named.json')
-            if named_json_path.exists():
-                with open(named_json_path, encoding='utf-8') as f:
-                    nd = json.load(f)
-                u_banner = next((b for b in nd.get('banners', []) if b.get('id') == '9200005'), None)
-                if u_banner:
-                    t7 = next((t for t in (u_banner.get('pool') or {}).get('tiers', []) if t.get('rarity') == 7), None)
-                    for uid in (t7.get('units') or []):
-                        uid_str = str(uid)
-                        if len(uid_str) >= 2 and uid_str[-2] != '0':
-                            continue
-                        if uid_str not in seen:
-                            name = unit_name(uid_str) or f"Neo Vision {uid_str}"
-                            seen.add(uid_str)
-                            mst = unit_mst(uid_str) or {}
-                            is_nv_plus = (str(mst.get('5Mgpv8hJ')) == '2')
-                            units.append({'id': uid_str, 'name': name, 'rarity': 'NV+' if is_nv_plus else 'NV', 'rarity_num': 8 if is_nv_plus else 7})
+            units = [
+                {'id': '401016727', 'name': 'Blade Breaker Esther', 'rarity': 'NV+', 'rarity_num': 8},
+                {'id': '216000127', 'name': 'Clive Rosfield', 'rarity': 'NV+', 'rarity_num': 8},
+                {'id': '100044827', 'name': 'Crimson Knight Rain', 'rarity': 'NV+', 'rarity_num': 8},
+                {'id': '401016627', 'name': 'Imperial Shield Wilhelm', 'rarity': 'NV+', 'rarity_num': 8},
+                {'id': '401016427', 'name': 'Fundamental Forces', 'rarity': 'NV+', 'rarity_num': 8},
+                {'id': '207002327', 'name': "Avalanche's Tifa", 'rarity': 'NV+', 'rarity_num': 8},
+                {'id': '401013807', 'name': '2B -Neo Vision-', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '401012907', 'name': 'Reberta & Ignitos', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '100014307', 'name': 'Sephiroth', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '100013007', 'name': 'Cloud', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '100010007', 'name': 'Rain -Neo Vision-', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '100010107', 'name': 'Lasswell -Neo Vision-', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '100010207', 'name': 'Fina -Neo Vision-', 'rarity': 'NV', 'rarity_num': 7},
+                {'id': '100010005', 'name': 'Awakened Rain', 'rarity': '5★', 'rarity_num': 5},
+                {'id': '100010105', 'name': 'Pyro Glacial Lasswell', 'rarity': '5★', 'rarity_num': 5},
+                {'id': '100010205', 'name': 'Lotus Mage Fina', 'rarity': '5★', 'rarity_num': 5},
+            ]
         units.sort(key=lambda u: (0 if u['rarity'] == 'NV+' else (1 if u['rarity'] == 'NV' else 2), u['name'].lower()))
         return units
     except Exception:
         return [
-            {'id': '100045107', 'name': 'Azure and Crimson Blades Rhus', 'rarity': 'NV', 'rarity_num': 7},
-            {'id': '100044807', 'name': 'Crimson Knight Rain', 'rarity': 'NV', 'rarity_num': 7},
-            {'id': '100044907', 'name': 'Azure Knight Lasswell', 'rarity': 'NV', 'rarity_num': 7},
-            {'id': '100045007', 'name': 'Hero Resurrected Taivas', 'rarity': 'NV', 'rarity_num': 7},
+            {'id': '401016727', 'name': 'Blade Breaker Esther', 'rarity': 'NV+', 'rarity_num': 8},
+            {'id': '216000127', 'name': 'Clive Rosfield', 'rarity': 'NV+', 'rarity_num': 8},
+            {'id': '100044827', 'name': 'Crimson Knight Rain', 'rarity': 'NV+', 'rarity_num': 8},
+            {'id': '401016627', 'name': 'Imperial Shield Wilhelm', 'rarity': 'NV+', 'rarity_num': 8},
+            {'id': '401016427', 'name': 'Fundamental Forces', 'rarity': 'NV+', 'rarity_num': 8},
+            {'id': '207002327', 'name': "Avalanche's Tifa", 'rarity': 'NV+', 'rarity_num': 8},
+            {'id': '401013807', 'name': '2B -Neo Vision-', 'rarity': 'NV', 'rarity_num': 7},
+            {'id': '401012907', 'name': 'Reberta & Ignitos', 'rarity': 'NV', 'rarity_num': 7},
             {'id': '100014307', 'name': 'Sephiroth', 'rarity': 'NV', 'rarity_num': 7},
             {'id': '100013007', 'name': 'Cloud', 'rarity': 'NV', 'rarity_num': 7},
             {'id': '100010007', 'name': 'Rain -Neo Vision-', 'rarity': 'NV', 'rarity_num': 7},

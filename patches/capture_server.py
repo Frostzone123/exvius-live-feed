@@ -507,8 +507,22 @@ class Handler(BaseHTTPRequestHandler):
                         clear = 'clear_pool' in qs or qs.get('action', [''])[0] == 'clear'
                         set_id = qs.get('set_target', [''])[0]
                         def _norm(u):
+                            if not u:
+                                return u
                             s = str(u)
-                            return s[:-2] + '07' if s.endswith('17') and len(s) >= 9 else s
+                            if s.endswith('17') and len(s) >= 9:
+                                s = s[:-2] + '07'
+                            elif s.endswith('37') and len(s) >= 9:
+                                s = s[:-2] + '27'
+                            elif s.endswith('07') and len(s) >= 9:
+                                try:
+                                    from player_state import unit_mst
+                                    mst_c = unit_mst(s[:-2] + '27') or {}
+                                    if str(mst_c.get('5Mgpv8hJ')) == '2':
+                                        s = s[:-2] + '27'
+                                except Exception:
+                                    pass
+                            return s
                         add_id = _norm(add_id)
                         rem_id = _norm(rem_id)
                         set_id = _norm(set_id)

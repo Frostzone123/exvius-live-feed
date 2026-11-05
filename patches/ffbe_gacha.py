@@ -327,10 +327,21 @@ def all_banners() -> list:
         nv_rateups = []
         star5_rateups = []
         norm_ids = []
+        try:
+            from player_state import unit_mst
+        except Exception:
+            unit_mst = lambda _: {}
         for uid in pool_ids:
             u_s = str(uid)
             if u_s.endswith("17") and len(u_s) >= 9:
                 u_s = u_s[:-2] + "07"
+            elif u_s.endswith("37") and len(u_s) >= 9:
+                u_s = u_s[:-2] + "27"
+            elif u_s.endswith("07") and len(u_s) >= 9:
+                cand_nvp = u_s[:-2] + "27"
+                mst_cand = unit_mst(cand_nvp) or {}
+                if str(mst_cand.get("5Mgpv8hJ")) == "2":
+                    u_s = cand_nvp
             if u_s not in norm_ids:
                 norm_ids.append(u_s)
         pool_ids = norm_ids

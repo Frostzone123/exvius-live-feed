@@ -1268,33 +1268,30 @@ def effect_pattern_for(rarity, gacha_id=None) -> str | None:
                       if str(r.get("9fW0TePj")) == str(rarity)
                       and str(r.get("zoU5J3Kq", "")).isdigit() and pred(r))
 
-    if gacha_id is not None:
-        exact = ids_for(lambda r: str(r.get("X1IuZnj2")) == str(gacha_id))
-        if exact:
-            return str(exact[0])
+    exact_crystals = ids_for(lambda r: str(r.get("X1IuZnj2")) == str(gacha_id) and is_crystal_pattern(r)) if gacha_id is not None else []
+    if exact_crystals:
+        return str(exact_crystals[0])
 
     crystal_ids = ids_for(is_crystal_pattern)
-    if crystal_ids:
-        # Canonical crystal animations:
-        # Rarity 8 (NV+): pattern 6228 (blocks 8881,8882,8894: gacha_r4_c4_nvplus / NV+ crystal)
-        # Rarity 7 (NV): pattern 35 (blocks 8881,8882,8884: gacha_rarenv / red crystal)
-        # Rarity 5 (Rainbow): pattern 9 (blocks 4441,4442,4444: gacha_rare5 / rainbow crystal)
-        try:
-            r_int = int(rarity)
-            if r_int >= 8 and 6228 in crystal_ids:
-                return "6228"
-            if r_int >= 8 and 6224 in crystal_ids:
-                return "6224"
-            if r_int == 7 and 35 in crystal_ids:
-                return "35"
-            if r_int == 5 and 9 in crystal_ids:
-                return "9"
-        except (ValueError, TypeError):
-            pass
-        return str(crystal_ids[0])
+    try:
+        r_int = int(rarity)
+        if r_int >= 8:
+            return "6228"
+        if r_int == 7:
+            return "35"
+        if r_int >= 5:
+            return "9"
+        if r_int == 4:
+            return "5"
+        if r_int == 3:
+            return "4"
+        return "1"
+    except (ValueError, TypeError):
+        pass
 
-    allids = ids_for(lambda r: True)
-    return str(allids[0]) if allids else None
+    if crystal_ids:
+        return str(crystal_ids[0])
+    return "35" if str(rarity) == "7" else ("6228" if str(rarity) == "8" else "1")
 
 
 def growth_table() -> dict:
@@ -4398,7 +4395,7 @@ class PlayerState:
             mid = str(award.get("unit_id") or "")
             mst = unit_mst(mid) or {}
             # In F_UNIT_MST, 5Mgpv8hJ is nvType: '2' represents Neo Vision Plus (NV+)
-            if str(mst.get("5Mgpv8hJ")) == "2":
+            if str(mst.get("5Mgpv8hJ")) == "2" or (mid.endswith("27") and len(mid) >= 9):
                 return 8
             return int(award.get("granted_rarity") or mst.get("9fW0TePj") or 1)
 
