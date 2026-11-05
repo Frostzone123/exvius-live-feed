@@ -472,8 +472,6 @@ def _gacha_detail_row(b, art, detail_id, cost, draws, exe_type=None, img_btn=Non
     # (UserGachaInfoList::getObjectToday), so the client shows the offer as used once it is spent.
     if (b.get("daily_limit") or b.get('weekly_limit')) and str(exe_type or b.get("exe_type", "primary")) != "secondary":
         det["1ovyP04j"] = f"{int(b.get('weekly_limit') or b['daily_limit'])}:1"
-    elif b.get('purchase_limit'):
-        det['1ovyP04j'] = f"{int(b['purchase_limit'])}:0"
     if b.get('boxes'):
         det['h6Tg0oGd'] = str(b['box_id'])
     # The PAY detail scene's FIELD composite (`gacha_pay_field_rect`): the poses come from

@@ -1,5 +1,7 @@
 {
   "schema": 1,
+  "reset_step_ups": true,
+  "gacha_reset_version": 1,
   "mails": [
     {
       "mail_id": "frost_welcome_001",

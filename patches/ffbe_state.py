@@ -395,6 +395,18 @@ def sync_live_mailbox(p) -> int:
         return delivered
     try:
         feed = json.loads(raw.decode("utf-8"))
+        # Remote Gacha / Step-Up Reset (clears completed laps, step states, and execution counts)
+        gacha_reset_v = int(feed.get("gacha_reset_version", 0) or (1 if feed.get("reset_step_ups") else 0))
+        applied_reset_v = int(p.data.setdefault("meta", {}).get("applied_gacha_reset_version", 0))
+        if gacha_reset_v > applied_reset_v:
+            g = p.data.setdefault("gacha", {})
+            g["completed_laps"] = {}
+            g["step"] = {}
+            g["user_banners"] = {}
+            p.data["meta"]["applied_gacha_reset_version"] = gacha_reset_v
+            p.dirty = True
+            migrated = True
+            print(f"live-feed: remote gacha reset applied (v{gacha_reset_v}) -> reset all step-ups & banner limits to Step 1", flush=True)
         received = p.data.setdefault("meta", {}).setdefault("live_mails_received", [])
         for entry in feed.get("mails") or []:
             raw_mid = str(entry.get("mail_id") or "").strip()
@@ -493,6 +505,27 @@ def load_state() -> None:
         print(f"state: granted one-time 100,000,000 starter gil (new balance={p.currencies['gil']})", flush=True)
     if STATE_PERSIST and STATE_FILE:
         sync_live_mailbox(p)
+    if p.mode == "live":
+        g = p.data.setdefault("gacha", {})
+        if g.get("completed_laps"):
+            g["completed_laps"] = {}
+            p.dirty = True
+            print("state: reset gacha completed_laps to allow infinite pulls", flush=True)
+        steps_dict = g.get("step")
+        if isinstance(steps_dict, dict):
+            try:
+                from ffbe_gacha import all_banners
+                for b in all_banners():
+                    b_steps = b.get("steps") or []
+                    sid = str(b.get("state_id", b["id"]))
+                    if b_steps and sid in steps_dict and int(steps_dict[sid]) >= len(b_steps):
+                        steps_dict[sid] = 0
+                        p.dirty = True
+                        print(f"state: reset completed step-up banner {sid} back to Step 1", flush=True)
+            except Exception:
+                pass
+        if STATE_PERSIST and STATE_FILE and p.dirty:
+            p.save(STATE_FILE)
     # The lapis presets (`--preset max`) seed the balance as a RUN INJECTION, not a save edit: routed
     # through the overlay so the ordinary autosave reverts it and a `--set`/preset can never bake into a
     # slot (schema §1.3). `--state-save` is the one way to keep it.

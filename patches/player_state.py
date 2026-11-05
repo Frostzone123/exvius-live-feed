@@ -4034,7 +4034,15 @@ class PlayerState:
         `UserGachaStepInfo` is `{gachaId, stepNum}` and the request carries no step, so this is ours."""
         if not banner.get("steps"):
             return 0
-        return int(self.data.get("gacha", {}).get("step", {}).get(str(banner.get('state_id', banner["id"])), 0))
+        sid = str(banner.get('state_id', banner["id"]))
+        val = int(self.data.get("gacha", {}).get("step", {}).get(sid, 0))
+        steps = banner.get("steps") or []
+        if steps and val >= len(steps):
+            val = 0
+            if "gacha" in self.data and "step" in self.data["gacha"]:
+                self.data["gacha"]["step"][sid] = 0
+                self.dirty = True
+        return val
 
     @staticmethod
     def _apply_unit_reward_metadata(unit, reward):
@@ -4073,7 +4081,7 @@ class PlayerState:
         repeats = max(1, int(repeats))
         state_id = str(banner.get('state_id', banner['id']))
         banner_counts = self.data.get('gacha', {}).get('user_banners', {}).get(state_id, {})
-        purchase_limit = int(banner.get('purchase_limit', 0))
+        purchase_limit = 0  # Infinite pulls allowed on all banners
         if purchase_limit and int(banner_counts.get('total_exe_count', 0)) + repeats > purchase_limit:
             return None
         # A once-a-day banner (the 1/2 price summon, `daily_limit`) refuses the pull past its daily count.
@@ -4088,7 +4096,7 @@ class PlayerState:
         steps = banner.get("steps") or []
         step_index = self.gacha_step(banner)
         step = steps[step_index] if steps else {}
-        lap_limit = 0 if steps else int(banner.get('lap_limit') or 0)
+        lap_limit = 0  # Infinite laps allowed on all step-up banners
         completed_laps = self.data['gacha'].get('completed_laps', {})
         if lap_limit and int(completed_laps.get(state_id, 0)) >= lap_limit:
             print('    gacha refused: printed step-up lap limit reached', flush=True)
@@ -4403,8 +4411,8 @@ class PlayerState:
             rows.append({"X1IuZnj2": str(b["id"]), "nqzG3b2v": current_detail,
                          "Lqenh7d2": _served_start(b, window),
                          "u7dM3XwK": SERVED_END,
-                         "08MuyfqD": str(st["term_exe_count"]),
-                         "L4QmV0Nz": str(st["total_exe_count"])})
+                         "08MuyfqD": "0" if b.get('purchase_limit') else str(st["term_exe_count"]),
+                         "L4QmV0Nz": "0" if b.get('purchase_limit') else str(st["total_exe_count"])})
         return rows
 
     # --- derived views (schema §2.4) ---------------------------------------------------------------
