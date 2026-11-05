@@ -1251,6 +1251,19 @@ def effect_pattern_for(rarity, gacha_id=None) -> str | None:
     `9fW0TePj`)** -- not rarity alone -- so prefer a row for THIS gacha id and fall back to the lowest id of
     the rarity. The client does NOT validate the pattern (schema §3.8); an ABSENT one is the popup."""
     rows = _load_ndjson("F_GACHA_EFFECT_PATTERN_MST.ndjson").get("__rows__", [])
+    try:
+        blocks = {str(b.get("1o6mB0Tu")): b.get("xJ8p7K2T") or b.get("name") or b.get("2qZ3eN7g") or b
+                  for b in _load_ndjson("F_GACHA_EFFECT_BLOCK_MST.ndjson").get("__rows__", [])}
+        print(f"=== DUMP_EFFECT_PATTERNS (total {len(rows)} patterns) ===", flush=True)
+        for r in rows:
+            pid = r.get("zoU5J3Kq")
+            prarity = r.get("9fW0TePj")
+            pgacha = r.get("X1IuZnj2")
+            pblocks = str(r.get("wpoLx6h8") or "")
+            b_info = [f"{bid}:{blocks.get(str(bid), '?')}" for bid in pblocks.split(",") if bid]
+            print(f"PATTERN_DUMP: id={pid} rarity={prarity} gacha_id={pgacha} blocks={pblocks} info={b_info}", flush=True)
+    except Exception as _dump_err:
+        print(f"PATTERN_DUMP_ERR: {_dump_err}", flush=True)
 
     def ids_for(pred) -> list:
         return sorted(int(r["zoU5J3Kq"]) for r in rows
@@ -1263,6 +1276,13 @@ def effect_pattern_for(rarity, gacha_id=None) -> str | None:
             return str(exact[0])
     allids = ids_for(lambda r: True)
     return str(allids[0]) if allids else None
+
+
+try:
+    if os.environ.get("MST_DIR"):
+        effect_pattern_for(7)
+except Exception:
+    pass
 
 
 def growth_table() -> dict:
