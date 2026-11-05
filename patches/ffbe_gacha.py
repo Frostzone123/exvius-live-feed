@@ -276,6 +276,15 @@ def all_banners() -> list:
                     pool_ids = [str(st.State.player.data["custom_stepup_unit"])]
             nv_rateups = []
             star5_rateups = []
+            # Normalize any Brave Shift IDs (...17) to base summonable IDs (...07)
+            norm_ids = []
+            for uid in pool_ids:
+                u_s = str(uid)
+                if u_s.endswith("17") and len(u_s) >= 9:
+                    u_s = u_s[:-2] + "07"
+                if u_s not in norm_ids:
+                    norm_ids.append(u_s)
+            pool_ids = norm_ids
             try:
                 from player_state import unit_mst
                 for uid in pool_ids:

@@ -56,12 +56,23 @@ def selectable_units():
         from ffbe_gacha import unit_name
         roots = unit_roots_by_rarity()
         named = named_unit_ids()
+        shift_targets = set()
+        try:
+            from player_state import nv_shift_targets
+            shift_targets = nv_shift_targets() or set()
+        except Exception:
+            pass
         units = []
         seen = set()
         for r_str, label in (('7', 'NV'), ('5', '5★')):
             for uid in roots.get(r_str, []):
                 uid_str = str(uid)
                 if uid_str.startswith('9') or uid_str in seen:
+                    continue
+                # Filter out Brave Shift forms (in-battle transformations, not summonable base units)
+                if uid_str in shift_targets:
+                    continue
+                if r_str == '7' and len(uid_str) >= 2 and uid_str[-2] != '0':
                     continue
                 if named and uid_str not in named:
                     continue
