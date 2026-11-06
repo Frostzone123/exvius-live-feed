@@ -103,6 +103,11 @@ def catalogue():
         ('10:902000505:1', 100000, 2147483647), # Eraser Gigantuar (Reset Pots)
         ('10:904000105:1:100:1:500:0:0:100000050', 50000, 2147483647),  # Trust Moogle (ALL 10%)
         ('10:906000105:1', 500000, 2147483647), # Super Trust Moogle (ALL 100%)
+
+        # NV Awakening Materials
+        ('20:1209002041:1', 10000, 2147483647),   # Azure Pearl (10,000 Gil)
+        ('20:1209002041:10', 100000, 2147483647), # Azure Pearl x10 (100,000 Gil)
+        ('20:1209001274:1', 50000, 2147483647),   # Transcension Pearl (50,000 Gil)
     ]
     for position, (reward, price, limit) in enumerate(pot_stock):
         product(940090000 + position, did, reward, price, limit, (30, '0'), False)

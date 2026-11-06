@@ -338,6 +338,16 @@ def notice_state(spec, req, reply_id):
     return spec
 
 
+def search_get_item_info(spec, req):
+    """SearchGetItemInfoRequest (item source lookup): query what missions drop an item.
+    Returns SearchGetItemInfoResponse (wsItm74h) with item id and mission list string."""
+    node = _node(req, "7KAG1f0L") or {}
+    item_id = str(node.get("tL6G9egd") or "")
+    out = dict(spec) if isinstance(spec, dict) else {}
+    out["wsItm74h"] = [{"tL6G9egd": item_id, "EaQgN15c": ""}]
+    return out
+
+
 HANDLERS = {
     'ey8mupb4': update_profile,
     'otgXV79T': option_update,    # OptionUpdateRequest
@@ -351,6 +361,7 @@ HANDLERS = {
     "d9Si7TYm": item_sell,          # ItemSellRequest
     "GfI4LaU3": mission_restart,    # MissionReStartRequest
     "zf49XKg8": unit_class_up,      # UnitClassUpRequest
+    "0D9mpGUR": search_get_item_info, # SearchGetItemInfoRequest
 }
 
 
