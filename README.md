@@ -1,72 +1,83 @@
-# Exvius Live Feed (`Frostzone123/exvius-live-feed`)
+# Final Fantasy Brave Exvius (FFBE) Offline — Patched Edition
 
-Lightweight live-configuration feed for custom **In-Game Mailbox Gifts**, **Over-the-Air (OTA) Server Hot-Patches**, and **Patched APK Releases**.
-
-## Direct APK Downloads (`v0.1.23-patched`)
-- **[Download Bonus Patched APK (`exvius-offline-v0.1.23-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk)** (Recommended) — Includes a one-time **9,000,000 Lapis + 100,000,000 Gil** starter bonus + all upstream v0.1.23 fixes (adaptive layout, shop fixes) + BlueStacks/Android 13–16 fixes + infinite step-up pulls + Live Mailbox/OTA feed.
-- **[Download Standard Patched APK (`exvius-offline-v0.1.23-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched.apk)** — Vanilla starting Lapis/Gil + all fixes + Live Mailbox/OTA feed.
-- **[View Release Notes & Changelog](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.23-patched)**
+Welcome to the **Patched Edition** of **FFBE Offline**! This project preserves the full *Final Fantasy Brave Exvius* experience as a standalone, offline-playable game with major quality-of-life enhancements, custom banner systems, infinite summons, and native support for modern Android devices and emulators.
 
 ---
 
-## 1. Sending In-Game Mailbox Gifts (`mailbox.json`)
+## 🎮 Direct APK Downloads (`v0.1.23-patched`)
 
-Edit [`mailbox.json`](mailbox.json) (even directly from GitHub in your browser!) and add a new entry to the `"mails"` array.
+Choose the edition that best suits your playstyle:
 
-Every time a player opens the app (or loads their save), the game fetches `mailbox.json` and delivers any new `mail_id` directly into their **in-game Mailbox**! Because `mail_id` is tracked per save file, each player will only receive a given `mail_id` once.
+* 🎁 **[Download Bonus Patched APK (`exvius-offline-v0.1.23-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk)** *(Recommended)*
+  * **9,000,000 Lapis & 100,000,000 Gil Starter Injection**: Enjoy complete summoning freedom and max out your favorite units and vision cards right from the start.
+  * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
-### Example `mailbox.json` Entry
-```json
-{
-  "mail_id": "weekend_gift_002",
-  "title": "Weekend Event Bonus!",
-  "message": "Enjoy 10,000 Lapis and 10 Rare Summon Tickets!",
-  "icon_type": 2,
-  "items": [
-    [50, 1, 10000],
-    [23, 180, 10]
-  ]
-}
-```
+* ⚔️ **[Download Standard Patched APK (`exvius-offline-v0.1.23-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched.apk)**
+  * **Vanilla Progression**: Standard starting resources for players who prefer earning every Lapis through story progression, missions, and trial challenges.
+  * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
-### Item Type Reference (`[item_type, item_id, count]`)
-| `item_type` | What It Grants | `item_id` | Example (`[type, id, count]`) |
-| :--- | :--- | :--- | :--- |
-| **`50`** | **Lapis** | `1` | `[50, 1, 10000]` (10,000 Lapis) |
-| **`30`** | **Gil** | `1` | `[30, 1, 5000000]` (5,000,000 Gil) |
-| **`51`** | **Friend Points** | `1` | `[51, 1, 10000]` (10,000 Friend Points) |
-| **`23`** | **Tickets / Important Items** | Ticket ID (e.g. `180` = 5★/NV Ticket) | `[23, 180, 10]` (10 Tickets) |
-| **`10`** | **Unit** | 9-digit `F_UNIT_MST` ID | `[10, 213000105, 1]` (1x Lightning) |
-| **`21`** | **Equipment (Weapon/Armor/Acc)** | `F_EQUIP_ITEM_MST` ID | `[21, 403046900, 1]` |
-| **`22`** | **Materia (Ability)** | `F_MATERIA_MST` ID | `[22, 504200010, 1]` |
-| **`20`** | **Consumable / Regular Item** | `F_ITEM_MST` ID | `[20, 101000100, 10]` (10x Potion) |
-| **`27`** | **Vision Card** | `F_VISION_CARD_MST` ID | `[27, 100000001, 1]` |
-
-### `icon_type` Options
-- `0`: Standard Envelope
-- `1`: Exclamation / Notice
-- `2`: Treasure Chest
-- `3`: Gold Invitation
+📦 **[View Full Release Notes & Changelogs on GitHub Releases](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.23-patched)**
 
 ---
 
-## 2. Pushing Over-the-Air (OTA) Server Hot-Patches (`patches/manifest.json`)
+## ✨ Features & Enhancements
 
-Whenever you want to push an updated Python server module (e.g., `ffbe_gacha.py`, `ffbe_battle.py`, `player_state.py`) or JSON data file to your friends **without making them download a new APK**:
+### 🌟 "United Forces" Custom Step-Up (Banner 9900001)
+Build your dream summon banner!
+* **Player-Selected Rate-Ups:** Choose your favorite Neo Vision (NV) and 5★ units directly from the in-game *Drop Rates* menu.
+* **Guaranteed NV Step:** Step 6 features a guaranteed NV slot that awards one of your selected rate-up units if none dropped in prior slots.
+* **Empty Pool Safety Guard:** If no units are selected, the summon button is safely locked to prevent accidental Lapis loss until you pick your targets.
+* **Permanent Visibility:** Always accessible in the summon tab regardless of active season or campaign filters.
 
-1. Put the updated `.py` or `.json` file into the `patches/` folder in this repo.
-2. Add an entry to [`patches/manifest.json`](patches/manifest.json) with its filename and SHA-256 hash:
-   ```json
-   {
-     "schema": 1,
-     "revision": 2,
-     "files": [
-       {
-         "name": "ffbe_gacha.py",
-         "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_gacha.py",
-         "sha256": "<sha256-of-file>"
-       }
-     ]
-   }
-   ```
-3. On next app launch, your friends' apps will automatically download the file into `exvius/live_patches/` and load it ahead of the bundled version!
+### 🔄 Infinite Step-Up Summon Loops
+* **No More One-Lap Limits:** Step-up banners no longer lock out or disappear after completing a lap.
+* **Seamless Reset:** Once you finish the final step of any banner, it automatically loops back to Step 1, letting you pull as many times as you want.
+
+### ⚡ Over-The-Air (OTA) Live Updates
+* **Zero-Reinstall Fixes:** The game automatically checks for lightweight live patches on startup.
+* **Instant Delivery:** Server fixes, balance adjustments, quest repairs, and new banner updates apply automatically over the air without having to redownload 14 GB of game data or reinstall APKs.
+
+### 📱 Modern Android & Emulator Compatibility
+* **Android 13, 14, 15, and 16 Ready:** Upgraded native loaders prevent linker and binder aborts on modern Android versions.
+* **BlueStacks Air / ARM64 Fixes:** Patched native runtime libraries resolve known startup crashes on modern emulators.
+* **Adaptive Screen Layout:** Native support for widescreen phones (19.5:9, 20:9), tablets, landscape orientation, and multi-window display modes.
+
+### 🛡️ Safe In-Place Updates
+* All APK releases are signed with a unified persistent key. Future APK updates can be installed directly over existing installations without losing your save data or downloaded assets.
+
+---
+
+## 🚀 Getting Started
+
+1. **Download & Install:**
+   Grab either the **Bonus Edition** or **Standard Edition** APK above and install it on your Android phone, tablet, or emulator (such as BlueStacks Air).
+2. **Initial Asset Download:**
+   On first launch, the app will download the official ~14.5 GB client data assets. Make sure you have sufficient free storage space and a stable Wi-Fi connection.
+3. **Jump In:**
+   Once the asset download finishes, you can play through the entire story, summon any unit in the game's history, challenge high-level trials, and customize your party completely offline!
+
+---
+
+## ❓ Frequently Asked Questions
+
+<details>
+<summary><b>Does the game require an internet connection?</b></summary>
+
+Internet access is only needed for the one-time initial download of the 14.5 GB base game assets and the quick startup check for live OTA patches. Core gameplay, battles, story, and summons run 100% locally on your device.
+</details>
+
+<details>
+<summary><b>Will installing an updated APK erase my save file?</b></summary>
+
+No! All releases use the same persistent signing key, allowing you to install updates directly over your existing app without touching your save data.
+</details>
+
+<details>
+<summary><b>Where is my save data stored?</b></summary>
+
+Your complete account progress (units, inventory, lapis, story clear state) is stored in a single file on your device at `files/local/state/campaign.json`.
+</details>
+
+---
+
+*Final Fantasy Brave Exvius is a registered trademark of SQUARE ENIX CO., LTD. This is a non-commercial, community preservation project.*
