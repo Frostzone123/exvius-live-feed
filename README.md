@@ -29,6 +29,21 @@ Choose the edition that best suits your playstyle:
 * **Unit Level Sync:** Fixed level rollbacks between battle results and the unit list.
 * **Autoplay Repeat Fix:** Autoplay repeat (xN) now awards exp, gil, and drops accurately without duplicate charges.
 
+### Stat Pot & Door Exchange Shop (Gil-Based)
+Easily enhance and limit-break your units without relying on retired raid summons!
+* **Shop Location:** Navigate to **Shop → Exchange Shop → Tab 2 (Special / Coin Exchange)** to open the permanent **`Stat Pot & Door Exchange`** banner.
+* **Balanced Gil Pricing:**
+  * **King Stat Pots** (HP, MP, ATK, DEF, MAG, SPR): `10,000 Gil` each
+  * **King Burst Pot** (+10,000 LB EXP): `25,000 Gil` each (or regular Burst Pot for `10,000 Gil`)
+  * **Stat Doors** (HP, MP, ATK, DEF, MAG, SPR Cap Extensions): `50,000 Gil` each
+  * **Utility & Fusion Enhancers:** King Metal Minituar (`5,000 Gil`), Emperor Gigantuar (`25,000 Gil`), Eraser Gigantuar (`100,000 Gil`), Trust Moogles 10% (`50,000 Gil`), and Super Trust Moogles 100% (`500,000 Gil`).
+* **Bulk Purchases:** All stock is unlimited with the native slider enabled to purchase between **1 and 99 pots in a single tap**.
+
+### Companion Settings & Custom Friend Roster
+The previously disabled in-game Companion Settings feature is fully unlocked and integrated:
+* **Fully Custom Loadouts:** Open **Friends → Companion Settings** to equip your favorite units, espers, vision cards, and gear loadouts across all 5 reinforcement tabs (*Favorite, Event 1, Event 2, Nemesis 1, Nemesis 2*).
+* **Rank 1000 "Frostzn" Companion:** Quests and battle reinforcement selections automatically populate companion units using your custom loadouts as the legendary companion **Frostzn** (Rank 1000).
+
 ### "United Forces" Custom Step-Up (Banner 9900001)
 Build your dream summon banner!
 * **Player-Selected Rate-Ups:** Choose your favorite Neo Vision (NV) and 5★ units directly from the in-game *Drop Rates* menu.
