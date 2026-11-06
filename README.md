@@ -109,6 +109,13 @@ Yes! Both editions share the same persistent key and save file format.
 
 ---
 
+## Community & Support
+
+If you need support, want to report an issue, or want to discuss the project with other players, join the Discord server:
+* **Discord:** [https://discord.gg/aqXCqAJw4E](https://discord.gg/aqXCqAJw4E)
+
+---
+
 ## Credits & Acknowledgments
 
 * **[Elvlin](https://github.com/Elvlin/exvius-offline)**: Creator of the original **Exvius Offline** project. Without their extraordinary reverse-engineering efforts, server reconstruction, and dedication to game preservation, none of this would be possible.
