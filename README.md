@@ -1,6 +1,6 @@
 # Final Fantasy Brave Exvius (FFBE) Offline — Patched Edition
 
-Welcome to the **Patched Edition** of **FFBE Offline**! Built upon the groundbreaking reverse-engineering and preservation work by the original creator, **[Elvlin](https://github.com/Elvlin/exvius-offline)**, this project preserves the full *Final Fantasy Brave Exvius* experience as a standalone, offline-playable game with custom quality-of-life enhancements, custom banner systems, infinite summons, and native support for modern Android devices and emulators.
+Welcome to the **Patched Edition** of **FFBE Offline**! Built upon the amazing reverse-engineering and preservation work by the original creator, **[Elvlin](https://github.com/Elvlin/exvius-offline)**, this project preserves the full *Final Fantasy Brave Exvius* experience as a standalone, offline-playable game with custom quality-of-life enhancements, custom banner systems, infinite summons, and native support for modern Android devices and emulators.
 
 ---
 
