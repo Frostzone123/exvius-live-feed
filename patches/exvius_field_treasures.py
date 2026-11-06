@@ -105,8 +105,33 @@ def _mission_treasures(out, request):
 
 @lru_cache(maxsize=1)
 def _raw_catalogue():
-    path = Path(__file__).with_name('content') / 'field_treasures.json'
-    rows = json.loads(path.read_text(encoding='utf8'))['treasures']
+    content = None
+    try:
+        import sys
+        f = globals().get('__file__')
+        if f:
+            p = Path(f).with_name('content') / 'field_treasures.json'
+            if p.is_file():
+                content = json.loads(p.read_text(encoding='utf8'))
+        if not content:
+            for entry in sys.path:
+                p = Path(entry) / 'content' / 'field_treasures.json'
+                if p.is_file():
+                    content = json.loads(p.read_text(encoding='utf8'))
+                    break
+        if not content:
+            import pkgutil
+            for mod in ('data_paths', 'capture_server', 'exvius_offline'):
+                try:
+                    raw = pkgutil.get_data(mod, 'content/field_treasures.json')
+                    if raw:
+                        content = json.loads(raw.decode('utf8'))
+                        break
+                except Exception:
+                    pass
+    except Exception:
+        content = None
+    rows = (content or {}).get('treasures', [])
     return {str(row['id']): row for row in rows}
 
 

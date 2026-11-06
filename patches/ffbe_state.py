@@ -286,7 +286,7 @@ def repair_legacy_resource_skips(player, available):
     path = Path(__file__).with_name('content') / 'legacy_resource_skips.json'
     if not path.is_file():
         path = Path(HERE) / 'content' / 'legacy_resource_skips.json'
-    flags = json.loads(path.read_text(encoding='utf8'))['switches']
+    flags = json.loads(path.read_text(encoding='utf8'))['switches'] if path.is_file() else []
     positions = {flag: switch_position(flag) for flag in flags}
     signature = {}
     for position in positions.values():
