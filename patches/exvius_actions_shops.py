@@ -413,12 +413,24 @@ def shop_exchange_list(spec, req):
     return out
 
 
+_BUILTIN_SERVICE_MASTERS = {
+    'gifts': [{"Utx8P1Qo": "10", "YWF08vZS": "30", "6uIYE15X": "0", "Qy5EvcK1": "20", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "20", "YWF08vZS": "51", "6uIYE15X": "0", "Qy5EvcK1": "10", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "30", "YWF08vZS": "20", "6uIYE15X": "201000100", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "40", "YWF08vZS": "20", "6uIYE15X": "201000200", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "50", "YWF08vZS": "20", "6uIYE15X": "201000300", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "60", "YWF08vZS": "20", "6uIYE15X": "201000400", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "70", "YWF08vZS": "20", "6uIYE15X": "201000500", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "80", "YWF08vZS": "20", "6uIYE15X": "201000600", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "90", "YWF08vZS": "20", "6uIYE15X": "201000700", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"Utx8P1Qo": "100", "YWF08vZS": "20", "6uIYE15X": "201000800", "Qy5EvcK1": "1", "8DZfvju4": "1", "VjJQ51uG": "2016-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}],
+    'trust_exchange': [{"d9gKeu0T": "900001", "7iJpH5zZ": "10:904000115:1", "5Fix0IX9": "1", "Yc8Mm6y7": "10000", "Hp54A9JM": "10", "Z0EN6jSh": "1", "T7aEx3Mj": "Empty Prism Moogle", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900002", "7iJpH5zZ": "23:260:1", "5Fix0IX9": "1", "Yc8Mm6y7": "5000", "Hp54A9JM": "120", "Z0EN6jSh": "2", "T7aEx3Mj": "5-star Select Summon Ticket", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900003", "7iJpH5zZ": "23:110180:1", "5Fix0IX9": "1", "Yc8Mm6y7": "15000", "Hp54A9JM": "40", "Z0EN6jSh": "3", "T7aEx3Mj": "NV EX Ticket (5-star/NV)", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900004", "7iJpH5zZ": "20:106211340:1", "5Fix0IX9": "1", "Yc8Mm6y7": "1000", "Hp54A9JM": "180", "Z0EN6jSh": "4", "T7aEx3Mj": "Super Trust Moogle Exchange Ticket", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900005", "7iJpH5zZ": "20:900000001:1", "5Fix0IX9": "1", "Yc8Mm6y7": "25000", "Hp54A9JM": "-1", "Z0EN6jSh": "5", "T7aEx3Mj": "Omniprism", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900006", "7iJpH5zZ": "20:1209002041:10", "5Fix0IX9": "1", "Yc8Mm6y7": "400", "Hp54A9JM": "30", "Z0EN6jSh": "6", "T7aEx3Mj": "Azure Pearl x10", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900007", "7iJpH5zZ": "20:106200100:5", "5Fix0IX9": "1", "Yc8Mm6y7": "25000", "Hp54A9JM": "200", "Z0EN6jSh": "7", "T7aEx3Mj": "Star Quartz x5", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900008", "7iJpH5zZ": "10:900010501:1", "5Fix0IX9": "1", "Yc8Mm6y7": "100", "Hp54A9JM": "-1", "Z0EN6jSh": "8", "T7aEx3Mj": "Gil Snapper Tower", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900009", "7iJpH5zZ": "10:900020401:1:100:60", "5Fix0IX9": "1", "Yc8Mm6y7": "150", "Hp54A9JM": "-1", "Z0EN6jSh": "9", "T7aEx3Mj": "King Metal Minituar (Max level)", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}, {"d9gKeu0T": "900010", "7iJpH5zZ": "20:1209001294:1", "5Fix0IX9": "1", "Yc8Mm6y7": "100", "Hp54A9JM": "-1", "Z0EN6jSh": "10", "T7aEx3Mj": "Brave Insignia (Joined Forces)", "VjJQ51uG": "2019-01-01 00:00:00", "m8ivD4NX": "2099-12-31 23:59:59"}]
+}
+
+
 @lru_cache(maxsize=None)
 def _service_master(name):
     """Recovered service tables, which are not part of the static client masters."""
     keys = {'trust_exchange': 'd9gKeu0T', 'gifts': 'Utx8P1Qo'}
     path = Path(__file__).with_name('content') / (name + '.json')
-    rows = json.loads(path.read_text(encoding='utf8'))['rows']
+    if path.is_file():
+        try:
+            rows = json.loads(path.read_text(encoding='utf8'))['rows']
+            return {str(row[keys[name]]): row for row in rows}
+        except Exception:
+            pass
+    rows = _BUILTIN_SERVICE_MASTERS.get(name, [])
     return {str(row[keys[name]]): row for row in rows}
 
 
