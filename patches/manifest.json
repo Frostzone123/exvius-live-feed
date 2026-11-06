@@ -12,8 +12,8 @@
     },
     {
       "name": "ffbe_player.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=28",
-      "sha256": "f95f31c00140065324797d9184b838f229104fdaf6d483355ce62e1a65bea919"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_player.py?v=29",
+      "sha256": "3eee576c880c682b4fec949a12acc3e8a3403d8ec948577132e4c7d20faac348"
     },
     {
       "name": "ffbe_state.py",
