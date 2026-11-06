@@ -18,7 +18,7 @@ GROUPS = (('standard', 'Standard'), ('season1', 'Season 1'), ('season2', 'Season
           ('season3', 'Season 3'), ('season4', 'Season 4'), ('collaborations', 'Collab'),
           ('custom', 'Custom Step Up'))
 # Always-available summons, shown with every group (as on the live game).
-PERMANENT_NAMES = {'Standard Summon', 'Rare Summon', 'Premium 10+1 Summon', '5★ Guaranteed 10+1 Summon'}
+PERMANENT_NAMES = {'Standard Summon', 'Rare Summon', 'Premium 10+1 Summon', '5★ Guaranteed 10+1 Summon', 'NV Guaranteed EX Summon B'}
 # Original GL9 tab of each GachaMst type code: GachaTopScene::setListLayout
 # (0x2120554) files a banner by GachaMst::isPayType / isFreeType (0, 6, 900) /
 # isLimitedType (50, 7).

@@ -4,23 +4,30 @@ Welcome to the **Patched Edition** of **FFBE Offline**! Built upon the amazing r
 
 ---
 
-## Direct APK Downloads (`v0.1.23-patched`)
+## Direct APK Downloads (`v0.1.24-patched`)
 
 Choose the edition that best suits your playstyle:
 
-* **[Download Bonus Patched APK (`exvius-offline-v0.1.23-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk)** *(Recommended)*
+* **[Download Bonus Patched APK (`exvius-offline-v0.1.24-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.24-patched/exvius-offline-v0.1.24-patched-bonus.apk)** *(Recommended)*
   * **9,000,000 Lapis & 100,000,000 Gil Starter Injection**: Enjoy complete summoning freedom and max out your favorite units and vision cards right from the start.
   * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
-* **[Download Standard Patched APK (`exvius-offline-v0.1.23-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched.apk)**
+* **[Download Standard Patched APK (`exvius-offline-v0.1.24-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.24-patched/exvius-offline-v0.1.24-patched.apk)**
   * **Vanilla Progression**: Standard starting resources for players who prefer earning every Lapis through story progression, missions, and trial challenges.
   * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
-**[View Full Release Notes & Changelogs on GitHub Releases](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.23-patched)**
+**[View Full Release Notes & Changelogs on GitHub Releases](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.24-patched)**
 
 ---
 
 ## Features & Enhancements
+
+### New in v0.1.24 (Upstream & Engine Fixes)
+* **Battle Trust Mastery (TMR) Gains:** Units now have a 30% chance to gain +1% Trust Mastery upon clearing quests.
+* **Super Trust (STMR) Moogle Fusion:** Fusing duplicates raises Super Trust, and the first identical fusion delivers a 50% All Trust Moogle to your mailbox.
+* **Exploration Chest Fixes:** Equipment and materia chests in explorations are now correctly added to your inventory and remain opened permanently.
+* **Unit Level Sync:** Fixed level rollbacks between battle results and the unit list.
+* **Autoplay Repeat Fix:** Autoplay repeat (xN) now awards exp, gil, and drops accurately without duplicate charges.
 
 ### "United Forces" Custom Step-Up (Banner 9900001)
 Build your dream summon banner!

@@ -911,7 +911,15 @@ def serve_gacha(spec, plaintext: str | None = None, reply_id=None):
             from gacha_box import roll
             res = roll(State.player, banner, req_detail, repeats)
         else:
-            res = State.player.roll_gacha(banner, repeats, ticket_id, offer=offer) if State.player else None
+            if State.player:
+                state_before, dirty_before = copy.deepcopy(State.player.data), State.player.dirty
+                try:
+                    res = State.player.roll_gacha(banner, repeats, ticket_id, offer=offer)
+                except Exception:
+                    State.player.data, State.player.dirty = state_before, dirty_before
+                    raise
+            else:
+                res = None
         if not res:
             _note(f"gacha: banner {banner['id']} pull x{repeats} (ticket {ticket_id}) refused "
                   f"(cost/affordability, or frozen); no award")
