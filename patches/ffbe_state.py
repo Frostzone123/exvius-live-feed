@@ -407,6 +407,14 @@ def sync_live_mailbox(p) -> int:
             p.dirty = True
             migrated = True
             print(f"live-feed: remote gacha reset applied (v{gacha_reset_v}) -> reset all step-ups & banner limits to Step 1", flush=True)
+        if feed.get("revert_starter_bonus") and p.data.get("meta", {}).get("starter_9m_lapis_granted") and not p.data.get("meta", {}).get("starter_bonus_reverted"):
+            p.currencies["lapis_free"] = max(0, int(p.currencies.get("lapis_free", 0) or 0) - 9000000)
+            p.currencies["gil"] = max(0, int(p.currencies.get("gil", 0) or 0) - 100000000)
+            p.data["meta"]["starter_9m_lapis_granted"] = False
+            p.data["meta"]["starter_bonus_reverted"] = True
+            p.dirty = True
+            migrated = True
+            print("live-feed: remote directive reverted 9M starter lapis and 100M starter gil", flush=True)
         received = p.data.setdefault("meta", {}).setdefault("live_mails_received", [])
         for entry in feed.get("mails") or []:
             raw_mid = str(entry.get("mail_id") or "").strip()
@@ -478,6 +486,35 @@ def sync_live_mailbox(p) -> int:
 
 
 
+def is_starter_bonus_edition() -> bool:
+    """Determine whether the installed APK is the Bonus Edition or the Standard/Vanilla Edition.
+    
+    1. Checks for an explicit edition.json marker if present.
+    2. Checks the bundled offline_menu module (which is never overwritten by OTA patches and
+       was specifically authored with lapis=0 in the standard APK vs lapis=9000000 in the bonus APK).
+    """
+    for candidate in (
+        os.path.join(HERE, "edition.json"),
+        os.path.join(os.path.dirname(HERE), "edition.json"),
+        "/data/user/0/com.exvius.offline.test/files/chaquopy/AssetFinder/app/edition.json",
+    ):
+        if os.path.isfile(candidate):
+            try:
+                with open(candidate, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                return bool(data.get("starter_bonus", True))
+            except Exception:
+                pass
+    try:
+        import offline_menu
+        new_game_fn = getattr(offline_menu, "new_game", None)
+        if new_game_fn and hasattr(new_game_fn, "__code__"):
+            return 9000000 in new_game_fn.__code__.co_consts
+    except Exception:
+        pass
+    return True
+
+
 def load_state() -> None:
     """Build the ONE player state from `STATE_FILE`. A v1 file is migrated; anything wrong starts FRESH and
     says so -- a test run must never be blocked by a bad file it can simply delete.
@@ -489,20 +526,33 @@ def load_state() -> None:
     State.player = PlayerState.load(STATE_FILE, slot=STATE_SLOT, mode=STATE_MODE,
                                     overlay=STATE_OVERLAY, sets=STATE_SETS)
     p = State.player
-    if p.mode == "live" and not p.data.setdefault("meta", {}).get("starter_9m_lapis_granted"):
-        p.currencies["lapis_free"] = int(p.currencies.get("lapis_free", 0) or 0) + 9000000
-        p.data["meta"]["starter_9m_lapis_granted"] = True
-        p.dirty = True
-        if STATE_PERSIST and STATE_FILE:
-            p.save(STATE_FILE)
-        print(f"state: granted one-time 9,000,000 starter lapis (new balance={p.currencies['lapis_free']})", flush=True)
-    if p.mode == "live" and not p.data.setdefault("meta", {}).get("starter_100m_gil_granted"):
-        p.currencies["gil"] = int(p.currencies.get("gil", 0) or 0) + 100000000
-        p.data["meta"]["starter_100m_gil_granted"] = True
-        p.dirty = True
-        if STATE_PERSIST and STATE_FILE:
-            p.save(STATE_FILE)
-        print(f"state: granted one-time 100,000,000 starter gil (new balance={p.currencies['gil']})", flush=True)
+    bonus_enabled = is_starter_bonus_edition()
+    if p.mode == "live":
+        if bonus_enabled:
+            if not p.data.setdefault("meta", {}).get("starter_9m_lapis_granted"):
+                p.currencies["lapis_free"] = int(p.currencies.get("lapis_free", 0) or 0) + 9000000
+                p.data["meta"]["starter_9m_lapis_granted"] = True
+                p.dirty = True
+                if STATE_PERSIST and STATE_FILE:
+                    p.save(STATE_FILE)
+                print(f"state: granted one-time 9,000,000 starter lapis (new balance={p.currencies['lapis_free']})", flush=True)
+            if not p.data.setdefault("meta", {}).get("starter_100m_gil_granted"):
+                p.currencies["gil"] = int(p.currencies.get("gil", 0) or 0) + 100000000
+                p.data["meta"]["starter_100m_gil_granted"] = True
+                p.dirty = True
+                if STATE_PERSIST and STATE_FILE:
+                    p.save(STATE_FILE)
+                print(f"state: granted one-time 100,000,000 starter gil (new balance={p.currencies['gil']})", flush=True)
+        else:
+            if p.data.get("meta", {}).get("starter_9m_lapis_granted") and not p.data.get("meta", {}).get("starter_bonus_reverted"):
+                p.currencies["lapis_free"] = max(0, int(p.currencies.get("lapis_free", 0) or 0) - 9000000)
+                p.currencies["gil"] = max(0, int(p.currencies.get("gil", 0) or 0) - 100000000)
+                p.data["meta"]["starter_9m_lapis_granted"] = False
+                p.data["meta"]["starter_bonus_reverted"] = True
+                p.dirty = True
+                if STATE_PERSIST and STATE_FILE:
+                    p.save(STATE_FILE)
+                print(f"state: standard edition detected -- safely deducted starter bonus (new lapis={p.currencies['lapis_free']}, gil={p.currencies['gil']})", flush=True)
     if STATE_PERSIST and STATE_FILE:
         sync_live_mailbox(p)
     try:

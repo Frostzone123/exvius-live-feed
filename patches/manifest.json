@@ -17,8 +17,8 @@
     },
     {
       "name": "ffbe_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=28",
-      "sha256": "0dd1da3aef3cb6a096a21476b57cb9e5a8b27b16cc69bd421b9ad211f2637217"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_state.py?v=31",
+      "sha256": "50e545bf120939798d153689e79a00b31c22ad97a34f022f06c6df04ffae54dc"
     },
     {
       "name": "gacha_archive.py",
