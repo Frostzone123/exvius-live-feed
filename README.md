@@ -4,50 +4,50 @@ Welcome to the **Patched Edition** of **FFBE Offline**! Built upon the groundbre
 
 ---
 
-## 🎮 Direct APK Downloads (`v0.1.23-patched`)
+## Direct APK Downloads (`v0.1.23-patched`)
 
 Choose the edition that best suits your playstyle:
 
-* 🎁 **[Download Bonus Patched APK (`exvius-offline-v0.1.23-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk)** *(Recommended)*
+* **[Download Bonus Patched APK (`exvius-offline-v0.1.23-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched-bonus.apk)** *(Recommended)*
   * **9,000,000 Lapis & 100,000,000 Gil Starter Injection**: Enjoy complete summoning freedom and max out your favorite units and vision cards right from the start.
   * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
-* ⚔️ **[Download Standard Patched APK (`exvius-offline-v0.1.23-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched.apk)**
+* **[Download Standard Patched APK (`exvius-offline-v0.1.23-patched.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.23-patched/exvius-offline-v0.1.23-patched.apk)**
   * **Vanilla Progression**: Standard starting resources for players who prefer earning every Lapis through story progression, missions, and trial challenges.
   * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
-📦 **[View Full Release Notes & Changelogs on GitHub Releases](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.23-patched)**
+**[View Full Release Notes & Changelogs on GitHub Releases](https://github.com/Frostzone123/exvius-live-feed/releases/tag/v0.1.23-patched)**
 
 ---
 
-## ✨ Features & Enhancements
+## Features & Enhancements
 
-### 🌟 "United Forces" Custom Step-Up (Banner 9900001)
+### "United Forces" Custom Step-Up (Banner 9900001)
 Build your dream summon banner!
 * **Player-Selected Rate-Ups:** Choose your favorite Neo Vision (NV) and 5★ units directly from the in-game *Drop Rates* menu.
 * **Guaranteed NV Step:** Step 6 features a guaranteed NV slot that awards one of your selected rate-up units if none dropped in prior slots.
 * **Empty Pool Safety Guard:** If no units are selected, the summon button is safely locked to prevent accidental Lapis loss until you pick your targets.
 * **Permanent Visibility:** Always accessible in the summon tab regardless of active season or campaign filters.
 
-### 🔄 Infinite Step-Up Summon Loops
+### Infinite Step-Up Summon Loops
 * **No More One-Lap Limits:** Step-up banners no longer lock out or disappear after completing a lap.
 * **Seamless Reset:** Once you finish the final step of any banner, it automatically loops back to Step 1, letting you pull as many times as you want.
 
-### ⚡ Over-The-Air (OTA) Live Updates
+### Over-The-Air (OTA) Live Updates
 * **Zero-Reinstall Fixes:** The game automatically checks for lightweight live patches on startup.
 * **Instant Delivery:** Server fixes, balance adjustments, quest repairs, and new banner updates apply automatically over the air without having to redownload 14 GB of game data or reinstall APKs.
 
-### 📱 Modern Android & Emulator Compatibility
+### Modern Android & Emulator Compatibility
 * **Android 13, 14, 15, and 16 Ready:** Upgraded native loaders prevent linker and binder aborts on modern Android versions.
 * **BlueStacks Air / ARM64 Fixes:** Patched native runtime libraries resolve known startup crashes on modern emulators.
 * **Adaptive Screen Layout:** Native support for widescreen phones (19.5:9, 20:9), tablets, landscape orientation, and multi-window display modes.
 
-### 🛡️ Safe In-Place Updates
+### Safe In-Place Updates
 * All APK releases are signed with a unified persistent key. Future APK updates can be installed directly over existing installations without losing your save data or downloaded assets.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 1. **Download & Install:**
    Grab either the **Bonus Edition** or **Standard Edition** APK above and install it on your Android phone, tablet, or emulator (such as BlueStacks Air).
@@ -58,7 +58,7 @@ Build your dream summon banner!
 
 ---
 
-## ❓ Frequently Asked Questions
+## Frequently Asked Questions
 
 <details>
 <summary><b>Does the game require an internet connection?</b></summary>
@@ -80,7 +80,7 @@ Your complete account progress (units, inventory, lapis, story clear state) is s
 
 ---
 
-## 👏 Credits & Acknowledgments
+## Credits & Acknowledgments
 
 * **[Elvlin](https://github.com/Elvlin/exvius-offline)**: Creator of the original **Exvius Offline** project. Without their extraordinary reverse-engineering efforts, server reconstruction, and dedication to game preservation, none of this would be possible.
 * **SQUARE ENIX CO., LTD. & gumi Inc.**: The original developers, artists, and creators of *Final Fantasy Brave Exvius*.
