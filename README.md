@@ -1,6 +1,6 @@
 # Final Fantasy Brave Exvius (FFBE) Offline — Patched Edition
 
-Welcome to the **Patched Edition** of **FFBE Offline**! This project preserves the full *Final Fantasy Brave Exvius* experience as a standalone, offline-playable game with major quality-of-life enhancements, custom banner systems, infinite summons, and native support for modern Android devices and emulators.
+Welcome to the **Patched Edition** of **FFBE Offline**! Built upon the groundbreaking reverse-engineering and preservation work by the original creator, **[Elvlin](https://github.com/Elvlin/exvius-offline)**, this project preserves the full *Final Fantasy Brave Exvius* experience as a standalone, offline-playable game with custom quality-of-life enhancements, custom banner systems, infinite summons, and native support for modern Android devices and emulators.
 
 ---
 
@@ -77,6 +77,13 @@ No! All releases use the same persistent signing key, allowing you to install up
 
 Your complete account progress (units, inventory, lapis, story clear state) is stored in a single file on your device at `files/local/state/campaign.json`.
 </details>
+
+---
+
+## 👏 Credits & Acknowledgments
+
+* **[Elvlin](https://github.com/Elvlin/exvius-offline)**: Creator of the original **Exvius Offline** project. Without their extraordinary reverse-engineering efforts, server reconstruction, and dedication to game preservation, none of this would be possible.
+* **SQUARE ENIX CO., LTD. & gumi Inc.**: The original developers, artists, and creators of *Final Fantasy Brave Exvius*.
 
 ---
 
