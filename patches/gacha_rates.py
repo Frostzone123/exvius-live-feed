@@ -342,11 +342,7 @@ def page(banner_id):
     body = '<h1>' + escape(banner['name']) + '</h1><p class="notice">' + escape(notice).replace('\n', '<br>') + '</p>'
     if str(banner_id) == '9900001':
         import ffbe_state as st
-        cur_pool = []
-        if st.State.player:
-            cur_pool = list(st.State.player.data.get('custom_stepup_pool') or [])
-            if not cur_pool and st.State.player.data.get('custom_stepup_unit'):
-                cur_pool = [str(st.State.player.data['custom_stepup_unit'])]
+        cur_pool = list(st.State.player.data.get('custom_stepup_pool') or []) if st.State.player else []
         body = _custom_stepup_picker_html(cur_pool) + '<hr style="border: 0; border-top: 1px solid #234b79; margin: 24px 0;">' + body
     if banner.get('boxes'):
         body += '<p>The first five boxes draw without replacement. Remaining quantities and featured rewards appear in the original Box Details screen.</p>'

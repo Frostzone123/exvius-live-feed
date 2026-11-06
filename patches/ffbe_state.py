@@ -656,6 +656,9 @@ def load_state() -> None:
         pass
     if p.mode == "live":
         cleanup_unwanted_units(p)
+        if "custom_stepup_unit" in p.data:
+            p.data.pop("custom_stepup_unit", None)
+            p.dirty = True
         g = p.data.setdefault("gacha", {})
         if g.get("completed_laps"):
             g["completed_laps"] = {}

@@ -528,17 +528,16 @@ class Handler(BaseHTTPRequestHandler):
                         set_id = _norm(set_id)
                         modified = False
                         if State.player:
+                            if 'custom_stepup_unit' in State.player.data:
+                                State.player.data.pop('custom_stepup_unit', None)
+                                modified = True
                             pool = [_norm(x) for x in list(State.player.data.get('custom_stepup_pool') or [])]
                             pool = list(dict.fromkeys(pool))
-                            if not pool and State.player.data.get('custom_stepup_unit'):
-                                pool = [str(State.player.data['custom_stepup_unit'])]
                             if clear:
                                 pool = []
-                                State.player.data.pop('custom_stepup_unit', None)
                                 modified = True
                             elif set_id:
                                 pool = [str(set_id)]
-                                State.player.data['custom_stepup_unit'] = str(set_id)
                                 modified = True
                             if add_id and str(add_id) not in pool:
                                 pool.append(str(add_id))
