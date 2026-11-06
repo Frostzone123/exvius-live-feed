@@ -130,17 +130,14 @@ def _entry(index: int, raw: dict) -> dict:
 
 
 def get_player_companions(tab: str = "1") -> list:
-    """Build the companion roster from the player's own units.
+    """Build the companion roster strictly from the player's Companion Settings (special party 7).
     
     Display Name: Frostzn
     Rank: 1000
     
-    Candidate source priority:
-    1. companion_deck: explicitly chosen companion units
-    2. Active party deck members
-    3. Other party deck members (Parties 1..10)
-    4. Favorited units (favourite == 1)
-    5. Top NV+/NV units from roster to fill up to 10 choices
+    Candidate source:
+    Exclusively the companion party deck (special party '7', deck 0) configured in the
+    native in-game Companion Settings screen (ReinforcementSettingScene).
     """
     from ffbe_state import State
     if State.player is None or not getattr(State.player, "data", None):
@@ -152,78 +149,20 @@ def get_player_companions(tab: str = "1") -> list:
 
     roster_by_id = {str(u.get("instance_id")): u for u in roster if isinstance(u, dict) and u.get("instance_id")}
 
-    chosen_iids = []
-    seen_masters = set()
+    p7 = data.get("party", {}).get("special", {}).get("7", {})
+    decks = p7.get("decks", [])
+    deck0 = decks[0] if decks else {}
+    members = deck0.get("members", [])
 
-    def try_add(iid):
-        iid_str = str(iid)
-        if iid_str in roster_by_id and iid_str not in chosen_iids:
-            u = roster_by_id[iid_str]
-            mid = str(u.get("master_id", ""))
-            if mid not in seen_masters:
-                seen_masters.add(mid)
-                chosen_iids.append(iid_str)
-                return True
-        return False
-
-    comp_deck = data.get("companion_deck")
-    if isinstance(comp_deck, list):
-        for iid in comp_deck:
-            try_add(iid)
-    elif isinstance(comp_deck, dict):
-        for slot in sorted(comp_deck.keys()):
-            try_add(comp_deck[slot])
-
-    party = data.get("party", {})
-    active_idx = int(party.get("active_deck") or 0)
-    decks = party.get("decks", [])
-    if isinstance(decks, list) and 0 <= active_idx < len(decks):
-        for m in decks[active_idx].get("members", []):
-            try_add(m.get("instance_id"))
-
-    if isinstance(decks, list):
-        for idx, d in enumerate(decks):
-            if idx == active_idx:
-                continue
-            for m in d.get("members", []):
-                try_add(m.get("instance_id"))
-
-    for u in roster:
-        if u.get("favourite"):
-            try_add(u.get("instance_id"))
-
-    if len(chosen_iids) < 10:
-        remaining = [u for u in roster if str(u.get("instance_id")) not in chosen_iids]
-        def unit_sort_key(u):
-            mid = str(u.get("master_id", ""))
-            is_nv_plus = mid.endswith("27")
-            is_nv = mid.endswith("7")
-            lvl = int(u.get("level") or 1)
-            try:
-                numeric_mid = int(mid)
-            except ValueError:
-                numeric_mid = 0
-            return (1 if is_nv_plus else 0, 1 if is_nv else 0, lvl, numeric_mid)
-
-        remaining.sort(key=unit_sort_key, reverse=True)
-        for u in remaining:
-            if len(chosen_iids) >= 10:
-                break
-            try_add(u.get("instance_id"))
-
-    if not chosen_iids:
+    # If Companion Settings has not been saved yet, or has no valid units:
+    valid_members = [m for m in members if str(m.get("instance_id")) in roster_by_id]
+    if not valid_members:
         return []
 
-    friends = []
-    esper_map = {}
-    beast_decks = data.get("beast_decks", {})
-    if isinstance(decks, list):
-        for d_idx, d in enumerate(decks):
-            b_list = beast_decks.get(str(d_idx), [])
-            for s_idx, m in enumerate(d.get("members", [])):
-                iid_str = str(m.get("instance_id"))
-                if s_idx < len(b_list) and b_list[s_idx]:
-                    esper_map[iid_str] = int(b_list[s_idx])
+    loadouts = p7.get("loadouts", {})
+    beast_decks = p7.get("beast_decks", {}).get("0", [])
+    if isinstance(beast_decks, dict):
+        beast_decks = [beast_decks.get(str(i), 0) for i in range(5)]
 
     vc_id_map = {}
     for vc in data.get("vision_cards") or []:
@@ -232,14 +171,23 @@ def get_player_companions(tab: str = "1") -> list:
 
     emblem_id = int(data.get("identity", {}).get("emblem_id") or 0)
 
-    for idx, iid in enumerate(chosen_iids):
+    # Sort members by disp_order (0=Favorite, 1=Event 1, 2=Event 2, 3=Nemesis 1, 4=Nemesis 2)
+    valid_members.sort(key=lambda m: int(m.get("disp_order", 0)))
+
+    friends = []
+    for idx, m in enumerate(valid_members):
+        iid = str(m["instance_id"])
         u = roster_by_id[iid]
+        order = int(m.get("disp_order", idx))
+        slot_tab = str(order + 1)  # 1..5
+
         mid = int(u["master_id"])
         lvl = max(1, int(u.get("level") or 1))
         lb_lvl = max(1, int(u.get("lb_level") or (1 if limit_burst(mid) else 0)))
         lb_exp = int(u.get("lb_exp") or 0)
 
-        eq_raw = u.get("equipment") or {}
+        u_loadout = loadouts.get(iid, {})
+        eq_raw = u_loadout.get("equipment") or u.get("equipment") or {}
         if isinstance(eq_raw, dict):
             equipment = [str(eq_raw.get(str(i + 1), "0")) for i in range(6)]
         elif isinstance(eq_raw, list):
@@ -247,13 +195,16 @@ def get_player_companions(tab: str = "1") -> list:
         else:
             equipment = ["0"] * 6
 
-        materia_raw = u.get("materia") or []
+        materia_raw = u_loadout.get("materia") or u.get("materia") or []
         abilities = [str(x) for x in materia_raw][:4] + ["0"] * max(0, 4 - len(materia_raw))
 
-        raw_vc = str(u.get("vision_card") or "")
+        raw_vc = str(u_loadout.get("vision_card") or u.get("vision_card") or "")
         vc_id = vc_id_map.get(raw_vc, raw_vc)
 
-        esper_id = esper_map.get(iid, 0)
+        esper_id = 0
+        if order < len(beast_decks) and beast_decks[order]:
+            esper_id = int(beast_decks[order])
+
         esper_rarity = 3
         esper_level = 60
         if esper_id:
@@ -263,14 +214,15 @@ def get_player_companions(tab: str = "1") -> list:
                     esper_level = int(b.get("level") or 60)
                     break
 
-        friend_id = 900000001 + idx
+        friend_id = 900000001 + order
         friends.append({
             "display_name": "Frostzn",
             "friend_id": friend_id,
             "emblem_id": emblem_id,
             "rank": 1000,
             "instance_id": str(friend_id * 10 + 1),
-            "tab": tab,
+            "tab": slot_tab,
+            "slot_order": order,
             "unit": {
                 "master_id": mid,
                 "level": lvl,
@@ -284,6 +236,7 @@ def get_player_companions(tab: str = "1") -> list:
                 "equipment": equipment,
             }
         })
+
     return friends
 
 
@@ -450,7 +403,9 @@ def serve_friends(spec, reply_id=None):
     if reply_id == REINFORCE_REPLY and isinstance(spec, dict):
         reinforce_rows = []
         for tab_no in ("1", "2", "3", "4", "5"):
-            for f in friends:
+            # Prioritize the companion unit specifically assigned to this tab
+            tab_sorted = sorted(friends, key=lambda f: (0 if str(f.get("tab")) == tab_no else 1, f.get("slot_order", 0)))
+            for f in tab_sorted:
                 f_tab = dict(f, tab=tab_no)
                 f_tab["instance_id"] = str(f["friend_id"] * 100 + int(tab_no) * 10 + 1)
                 reinforce_rows.append(_reinforce_row(f_tab))
