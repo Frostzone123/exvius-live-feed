@@ -1042,6 +1042,23 @@ def _only_named(rows: list) -> list:
     return kept
 
 
+NON_SUMMONABLE_STORY_ROOTS = {
+    "100000102",  # Rain (2★)
+    "100000202",  # Lasswell (2★)
+    "100000302",  # Fina (2★)
+    "100000403",  # Nichol (3★)
+    "100000503",  # Lid (3★)
+    "100000603",  # Sakura (3★)
+    "100000703",  # Jake (3★)
+    "100025705",  # Blue Mage Fina (5★)
+}
+
+
+def is_invalid_or_npc_unit(uid: str) -> bool:
+    s = str(uid)
+    return s.startswith("199") or s.startswith("256")
+
+
 def unit_roots_by_rarity() -> dict:
     """The BASE-rarity unit ids, keyed by rarity string: `F_UNIT_MST` rows whose master id is its own
     series root (`3HriTp6B == woghJa61`). These are what a tier-based pool expands to -- DERIVED from the
@@ -1052,7 +1069,10 @@ def unit_roots_by_rarity() -> dict:
         for r in _load_ndjson("F_UNIT_MST.ndjson").get("__rows__", []):
             if str(r.get(UNIT_KEY)) != str(r.get("woghJa61")):
                 continue
-            out.setdefault(str(r.get("9fW0TePj")), []).append(str(r.get(UNIT_KEY)))
+            uid = str(r.get(UNIT_KEY))
+            if uid in NON_SUMMONABLE_STORY_ROOTS or is_invalid_or_npc_unit(uid):
+                continue
+            out.setdefault(str(r.get("9fW0TePj")), []).append(uid)
         _UNIT_ROOTS = {k: sorted(v) for k, v in out.items()}
     return _UNIT_ROOTS
 
@@ -1198,8 +1218,10 @@ def expand_pool(banner: dict) -> list:
         explicit_units = bool(tier.get("units"))
         units = [str(u) for u in (tier.get("units") or [u for u in roots.get(str(tier.get("rarity")), [])
                                                           if keep_materials or not u.startswith("9")])]
+        units = [u for u in units if u not in NON_SUMMONABLE_STORY_ROOTS and not is_invalid_or_npc_unit(u)]
         # A featured unit drawn at its own rarity (an NV unit is not a base 5★ root) still belongs here.
-        units += [u for u in (str(x) for x in (tier.get("featured") or [])) if u not in units]
+        units += [u for u in (str(x) for x in (tier.get("featured") or []))
+                  if u not in units and u not in NON_SUMMONABLE_STORY_ROOTS and not is_invalid_or_npc_unit(u)]
         if not units:
             continue
         featured = [u for u in (str(x) for x in (tier.get("featured") or [])) if u in units]

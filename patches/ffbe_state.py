@@ -415,6 +415,8 @@ def sync_live_mailbox(p) -> int:
             p.dirty = True
             migrated = True
             print("live-feed: remote directive reverted 9M starter lapis and 100M starter gil", flush=True)
+        if cleanup_unwanted_units(p) > 0:
+            migrated = True
         received = p.data.setdefault("meta", {}).setdefault("live_mails_received", [])
         for entry in feed.get("mails") or []:
             raw_mid = str(entry.get("mail_id") or "").strip()
@@ -484,6 +486,95 @@ def sync_live_mailbox(p) -> int:
         print(f"live-feed: mailbox sync skipped ({type(exc).__name__})", flush=True)
     return delivered
 
+
+BASE_STORY_PREFIXES = (
+    "10000010",  # Rain (100000102..100000106)
+    "10000020",  # Lasswell (100000202..100000206)
+    "10000030",  # Fina (100000302..100000306)
+    "10000040",  # Nichol (100000403..100000405)
+    "10000050",  # Lid (100000503..100000505)
+    "10000060",  # Sakura (100000603..100000605)
+    "10000070",  # Jake (100000703..100000705)
+)
+
+
+def _is_base_story_unit(mid: str) -> str | None:
+    s = str(mid)
+    for p in BASE_STORY_PREFIXES:
+        if s.startswith(p):
+            return p
+    return None
+
+
+def _is_invalid_or_npc_unit(mid: str) -> bool:
+    s = str(mid)
+    return s.startswith("199") or s.startswith("256")
+
+
+def cleanup_unwanted_units(p) -> int:
+    """Clean up Emma (Battle NPC), test units, and duplicate base story units.
+
+    Story units cannot be fused, sold, or sent to reserves in FFBE. If a player
+    summoned extra copies from the friend point pool, those duplicates permanently
+    clog the inventory. This keeps the single best copy (in party, highest rarity,
+    level, exp) of each story character and purges extra duplicate copies, as well
+    as any battle NPCs like Emma.
+    """
+    roster = p.data.get("roster") or []
+    if not roster:
+        return 0
+
+    in_party_iids = set()
+    for deck in (p.data.get("party") or {}).get("decks") or []:
+        for m in deck.get("members") or []:
+            if isinstance(m, dict) and m.get("instance_id"):
+                in_party_iids.add(str(m["instance_id"]))
+    for pkey, pdict in (p.data.get("parties") or {}).items():
+        if isinstance(pdict, dict):
+            for m in pdict.get("members") or []:
+                if isinstance(m, dict) and m.get("instance_id"):
+                    in_party_iids.add(str(m["instance_id"]))
+
+    drop_iids = []
+    family_units = {}
+
+    for u in roster:
+        if not isinstance(u, dict):
+            continue
+        mid = str(u.get("master_id") or "")
+        iid = str(u.get("instance_id") or "")
+        if not mid or not iid:
+            continue
+
+        if _is_invalid_or_npc_unit(mid):
+            drop_iids.append(iid)
+            continue
+
+        fam = _is_base_story_unit(mid)
+        if fam:
+            family_units.setdefault(fam, []).append(u)
+
+    for fam, ulist in family_units.items():
+        if len(ulist) > 1:
+            ulist.sort(key=lambda u: (
+                1 if str(u.get("instance_id")) in in_party_iids else 0,
+                int(str(u.get("master_id"))[-1]) if str(u.get("master_id"))[-1].isdigit() else 0,
+                int(u.get("level") or 1),
+                int(u.get("total_exp") or u.get("exp") or 0),
+            ), reverse=True)
+            for dup in ulist[1:]:
+                drop_iids.append(str(dup["instance_id"]))
+
+    if drop_iids:
+        p.drop_units(drop_iids)
+        drop_set = set(drop_iids)
+        for pkey, pdict in (p.data.get("parties") or {}).items():
+            if isinstance(pdict, dict) and "members" in pdict:
+                pdict["members"] = [m for m in pdict["members"] if str(m.get("instance_id")) not in drop_set]
+        p.dirty = True
+        print(f"state: cleaned {len(drop_iids)} unwanted/duplicate unit(s) from inventory ({drop_iids})", flush=True)
+
+    return len(drop_iids)
 
 
 def is_starter_bonus_edition() -> bool:
@@ -564,6 +655,7 @@ def load_state() -> None:
     except Exception:
         pass
     if p.mode == "live":
+        cleanup_unwanted_units(p)
         g = p.data.setdefault("gacha", {})
         if g.get("completed_laps"):
             g["completed_laps"] = {}
