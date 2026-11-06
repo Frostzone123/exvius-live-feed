@@ -322,8 +322,6 @@ def all_banners() -> list:
         pool_ids = []
         if st.State.player:
             pool_ids = list(st.State.player.data.get("custom_stepup_pool") or [])
-            if not pool_ids and st.State.player.data.get("custom_stepup_unit"):
-                pool_ids = [str(st.State.player.data["custom_stepup_unit"])]
         nv_rateups = []
         star5_rateups = []
         norm_ids = []
@@ -899,11 +897,7 @@ def serve_gacha(spec, plaintext: str | None = None, reply_id=None):
         _note(f"gacha: pull banner {banner['id']} row={req_detail or '?'} "
               f"({'secondary offer' if offer else 'primary'}) repeats={repeats} ticket={ticket_id}")
         if str(banner.get("id")) == "9900001":
-            pool_ids = []
-            if State.player:
-                pool_ids = list(State.player.data.get("custom_stepup_pool") or [])
-                if not pool_ids and State.player.data.get("custom_stepup_unit"):
-                    pool_ids = [str(State.player.data["custom_stepup_unit"])]
+            pool_ids = list(State.player.data.get("custom_stepup_pool") or []) if State.player else []
             if not pool_ids:
                 _note("gacha: banner 9900001 pull refused - no rate-up units selected in Drop Rates")
                 return decline()
@@ -1022,8 +1016,6 @@ def custom_target_name(player) -> str:
     if not player:
         return "Select in Drop Rates (Locked)"
     pool_ids = list(player.data.get("custom_stepup_pool") or [])
-    if not pool_ids and player.data.get("custom_stepup_unit"):
-        pool_ids = [str(player.data["custom_stepup_unit"])]
     names = [unit_name(uid) or f"Unit {uid}" for uid in pool_ids if unit_name(uid) or uid]
     if not names:
         return "Select in Drop Rates (Locked)"
@@ -1039,8 +1031,6 @@ def custom_banner_explanation(player) -> str:
     if not player:
         return ""
     pool_ids = list(player.data.get("custom_stepup_pool") or [])
-    if not pool_ids and player.data.get("custom_stepup_unit"):
-        pool_ids = [str(player.data["custom_stepup_unit"])]
     if not pool_ids:
         return "Locked: Tap 'Drop Rates' to pick your featured Neo Vision and 5★ characters to unlock summoning."
     return ""
