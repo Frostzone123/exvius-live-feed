@@ -8,7 +8,7 @@ Welcome to the **Patched Edition** of **FFBE Offline**! Built upon the amazing r
 
 Choose the edition that best suits your playstyle:
 
-* **[Download Bonus Patched APK (`exvius-offline-v0.1.24-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.24-patched/exvius-offline-v0.1.24-patched-bonus.apk)** *(Recommended)*
+* **[Download Bonus Patched APK (`exvius-offline-v0.1.24-patched-bonus.apk`)](https://github.com/Frostzone123/exvius-live-feed/releases/download/v0.1.24-patched/exvius-offline-v0.1.24-patched-bonus.apk)** 
   * **9,000,000 Lapis & 100,000,000 Gil Starter Injection**: Enjoy complete summoning freedom and max out your favorite units and vision cards right from the start.
   * Includes all gameplay enhancements, custom banners, stability fixes, and live OTA updates.
 
