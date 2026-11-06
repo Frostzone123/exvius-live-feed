@@ -99,6 +99,14 @@ No! All releases use the same persistent signing key, allowing you to install up
 Your complete account progress (units, inventory, lapis, story clear state) is stored in a single file on your device at `files/local/state/campaign.json`.
 </details>
 
+<details>
+<summary><b>Can I switch between Bonus Edition and Vanilla Progression?</b></summary>
+
+Yes! Both editions share the same persistent key and save file format.
+* If you start on the Bonus Edition and later install the Standard APK, the game automatically deducts the starter bonus down to your earned balance (safely clamped at 0 so your wallet never goes negative) while keeping all your summoned characters, story progress, and equipment intact.
+* If you want a completely fresh start from scratch, tapping "New Game" from the offline Title Menu on the Standard APK begins a clean Chapter 1 playthrough with vanilla starting resources.
+</details>
+
 ---
 
 ## Credits & Acknowledgments
