@@ -27,7 +27,6 @@ Build your dream summon banner!
 * **Player-Selected Rate-Ups:** Choose your favorite Neo Vision (NV) and 5★ units directly from the in-game *Drop Rates* menu.
 * **Guaranteed NV Step:** Step 6 features a guaranteed NV slot that awards one of your selected rate-up units if none dropped in prior slots.
 * **Empty Pool Safety Guard:** If no units are selected, the summon button is safely locked to prevent accidental Lapis loss until you pick your targets.
-* **Permanent Visibility:** Always accessible in the summon tab regardless of active season or campaign filters.
 
 ### Infinite Step-Up Summon Loops
 * **No More One-Lap Limits:** Step-up banners no longer lock out or disappear after completing a lap.
