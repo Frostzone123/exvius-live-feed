@@ -47,8 +47,8 @@
     },
     {
       "name": "ffbe_friends.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_friends.py?v=28",
-      "sha256": "2d06b9a14b473583119c32346e0951371759b30f488c0c43a284434cb9b61117"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/ffbe_friends.py?v=30",
+      "sha256": "aaa3493947ad255bf41b6038c722d8c4a15534ee257eb8c400523a339e0fb106"
     },
     {
       "name": "friends.yaml",
