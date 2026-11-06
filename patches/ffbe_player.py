@@ -3490,8 +3490,7 @@ def credit_emblem_objectives(plaintext, spec, reply_id=None):
     rows = req.get(PROGRESS_MISSION_GROUP) if isinstance(req, dict) else None
     if not isinstance(rows, list) or not rows or not isinstance(rows[0], dict):
         return spec
-    if not mid:
-        mid = str(rows[0].get(PROGRESS_MISSION_TOKEN) or "")
+    mid = str(rows[0].get(PROGRESS_MISSION_TOKEN) or "")
     if mid and State.player.credit_emblem_objective(mid):
         deliver_emblem_tier_mail()
     return spec

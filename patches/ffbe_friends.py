@@ -37,6 +37,15 @@ REINFORCE_TAG = "9Tp2fiyB"      # ReinforcementResponse, the NON-clearing tag (p
 FRIENDINFO_TAG = "I53AVzSo"     # OpeFriendInfoResponse
 FRIENDLIST_TAG = "56gJBnVh"     # FriendUnitInfoResponse
 BOOT_REPLIES = {'75fYdNxq', 'X07iYtp5', '6H1R9WID'}
+REINFORCE_REPLIES = {
+    REINFORCE_REPLY,
+    "Daud71Hn",  # RoutineHomeUpdateRequest (1YWTzU9h)
+    "6H1R9WID",  # RoutineWorldUpdateRequest (oR1psQ5B)
+    "4kA1Ne05",  # RoutineEventUpdateRequest (WCK5tvr0)
+    "x5Unqg2d",  # MissionEndRequest (0ydjM5sU)
+    "JiglLZx6",  # TfaMissionEndRequest
+    "v51PM7wj",  # MissionRetireRequest
+}
 # ReinforcementVisionCardInfoResponse: the list the support screen resolves a companion's vision card
 # through. Its tags are `2MKHk9cg` (factory flag 1 - NON-clearing, the one to use) and `9iW4xAFL`
 # (flag 0 - clears everything first). Read 2026-10-15; the class's required tokens are the friend
@@ -393,7 +402,7 @@ def serve_friends(spec, reply_id=None):
     replay caught it growing nine unrelated replies. With no friends.yaml and no rows, both replies
     keep exactly the shape they had (an empty list), so this step cannot regress the empty case.
     """
-    relevant = set(BOOT_REPLIES) | {REINFORCE_REPLY, FRIENDLIST_REPLY}
+    relevant = set(BOOT_REPLIES) | {FRIENDLIST_REPLY} | REINFORCE_REPLIES
     if reply_id not in relevant:
         return spec
     try:
@@ -407,8 +416,8 @@ def serve_friends(spec, reply_id=None):
     if reply_id in BOOT_REPLIES and isinstance(spec, dict):
         # The Friends menu is available before the first companion request.
         # Populate its local list during startup as well as on explicit reads.
-        return serve_friends(spec, FRIENDLIST_REPLY)
-    if reply_id == REINFORCE_REPLY and isinstance(spec, dict):
+        serve_friends(spec, FRIENDLIST_REPLY)
+    if reply_id in REINFORCE_REPLIES and isinstance(spec, dict):
         reinforce_rows = []
         for tab_no in ("1", "2", "3", "4", "5"):
             # Prioritize the companion unit specifically assigned to this tab
