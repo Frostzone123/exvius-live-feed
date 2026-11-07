@@ -209,7 +209,7 @@ class Handler(BaseHTTPRequestHandler):
         # wave limit describes field encounters, not an opening battle roster.
         # Keep the mission key so normal entry costs and completion still apply.
         if (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
-                and reply_id in State.replies and (battle_content.resource_kind(mid) == 'exploration'
+                and reply_id in State.replies and ((mid and battle_content.resource_kind(mid) == 'exploration')
                     or str((mission_row(mid) or {}).get('Y4VoF8yu')) == '2')):
             try:
                 row = mission_row(mid) or {'qo3PECw6': str(mid)}
@@ -228,12 +228,13 @@ class Handler(BaseHTTPRequestHandler):
         # it as a mission load (no attempt, drops or save change). An id in no
         # known table is still served that way, but logged loudly.
         menu_resource = battle_content.is_menu_resource_row(mission_row(mid)) if mid else False
-        is_expl = (bundle_source == 'exploration' or battle_content.resource_kind(mid) == 'exploration')
+        is_expl = bool(bundle_source == 'exploration' or (mid and battle_content.resource_kind(mid) == 'exploration'))
         is_known = False
-        try:
-            is_known = battle_content.is_known_mission(mid)
-        except Exception:
-            pass
+        if mid:
+            try:
+                is_known = battle_content.is_known_mission(mid)
+            except Exception:
+                pass
         no_encounter = (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
                         and reply_id in State.replies and not is_expl
                         and (is_map_event(mid) or is_town(mid) or menu_resource or not is_known))

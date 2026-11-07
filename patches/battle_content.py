@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import threading
 import unicodedata
 
@@ -559,6 +560,27 @@ def derive_mission(mission: int, source: Source | str, break_status: dict[str, d
     return bundle
 
 
+def _find_server_file(*relative_parts: str) -> str | None:
+    cand_dirs = [
+        HERE,
+        os.path.dirname(os.path.abspath(__file__)),
+        os.path.join(HERE, 'content'),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content'),
+    ]
+    try:
+        import local_game
+        cand_dirs.append(os.path.dirname(os.path.abspath(local_game.__file__)))
+        cand_dirs.append(os.path.join(os.path.dirname(os.path.abspath(local_game.__file__)), 'content'))
+    except Exception:
+        pass
+    cand_dirs.extend(sys.path)
+    for d in cand_dirs:
+        cand = os.path.join(d, *relative_parts)
+        if os.path.isfile(cand):
+            return cand
+    return None
+
+
 _FIELD_GROUP_BINDINGS = None
 _FIELD_BINDINGS_DATA = None
 
@@ -577,10 +599,17 @@ def field_mission_bundle(carrier: dict, mission: dict) -> dict:
                  and len(str(row['2fY1IomW'])) == len(mid) + 2}
     global _FIELD_GROUP_BINDINGS, _FIELD_BINDINGS_DATA
     if _FIELD_BINDINGS_DATA is None:
-        path = os.path.join(HERE, 'content', 'field_group_bindings.json')
-        with open(path, encoding='utf8') as stream:
-            _FIELD_BINDINGS_DATA = json.load(stream)
-            _FIELD_GROUP_BINDINGS = _FIELD_BINDINGS_DATA.get('missions', {})
+        path = _find_server_file('content', 'field_group_bindings.json') or _find_server_file('field_group_bindings.json')
+        if path:
+            try:
+                with open(path, encoding='utf8') as stream:
+                    _FIELD_BINDINGS_DATA = json.load(stream)
+                    _FIELD_GROUP_BINDINGS = _FIELD_BINDINGS_DATA.get('missions', {})
+            except Exception:
+                pass
+        if _FIELD_BINDINGS_DATA is None:
+            _FIELD_BINDINGS_DATA = {}
+            _FIELD_GROUP_BINDINGS = {}
     scenario_links = _FIELD_BINDINGS_DATA.get('scenario_links', {})
     group_ids.update(_FIELD_GROUP_BINDINGS.get(mid, []))
     out = story_mission_bundle(carrier, mission)
@@ -715,40 +744,60 @@ _EVENT_BINDINGS = None
 _EVENT_ENCOUNTERS = None
 _EVENT_RESOURCE_MISSIONS = None
 _EVENT_SUPPORT = None
+_EVENT_BATTLES_DATA = None
+
+
+def _get_event_battles_data() -> dict:
+    global _EVENT_BATTLES_DATA
+    if _EVENT_BATTLES_DATA is not None:
+        return _EVENT_BATTLES_DATA
+    path = _find_server_file('event_battles.json')
+    if path:
+        try:
+            with open(path, encoding='utf-8') as fh:
+                _EVENT_BATTLES_DATA = json.load(fh)
+                return _EVENT_BATTLES_DATA
+        except Exception:
+            pass
+    _EVENT_BATTLES_DATA = {}
+    return _EVENT_BATTLES_DATA
 
 
 def event_support(table: str) -> list:
-    global _EVENT_SUPPORT
-    if _EVENT_SUPPORT is None:
-        with open(os.path.join(HERE, 'event_battles.json'), encoding='utf-8') as fh:
-            _EVENT_SUPPORT = json.load(fh).get('native_battle_support', {})
-    return _EVENT_SUPPORT.get(table, [])
+    try:
+        return _get_event_battles_data().get('native_battle_support', {}).get(table, [])
+    except Exception:
+        return []
 
 
-def resource_kind(mission: str) -> str | None:
-    smid = str(mission)
+def resource_kind(mission: str | int | None) -> str | None:
+    smid = str(mission or '')
+    if not smid or smid in ('None', '0', ''):
+        return None
     if smid in ('1115005', '1115006', '1115007'):
         return None
-    if smid == '1115004':
+    if smid in ('1110104', '1110105', '1110204', '1110206', '1110304', '1110305',
+                '1110404', '1110405', '1110406', '1110604', '1115004'):
         return 'exploration'
-    global _EVENT_RESOURCE_MISSIONS
-    if _EVENT_RESOURCE_MISSIONS is None:
-        with open(os.path.join(HERE, 'event_battles.json'), encoding='utf-8') as fh:
-            _EVENT_RESOURCE_MISSIONS = json.load(fh).get('resource_missions', {})
-    return _EVENT_RESOURCE_MISSIONS.get(smid)
+    try:
+        return _get_event_battles_data().get('resource_missions', {}).get(smid)
+    except Exception:
+        return None
 
 
 _KNOWN_MISSIONS = None
 
 
-def is_known_mission(mission_id: str | int) -> bool:
+def is_known_mission(mission_id: str | int | None) -> bool:
+    smid = str(mission_id or '')
+    if not smid or smid in ('None', '0', ''):
+        return False
     global _KNOWN_MISSIONS
     if _KNOWN_MISSIONS is None:
         smissions = set()
         try:
-            with open(os.path.join(HERE, 'event_battles.json'), encoding='utf-8') as fh:
-                data = json.load(fh)
-                smissions = set(data.get('missions', {}).keys()) | set(data.get('resource_missions', {}).keys())
+            data = _get_event_battles_data()
+            smissions = set(data.get('missions', {}).keys()) | set(data.get('resource_missions', {}).keys())
         except Exception:
             pass
         if not smissions:
@@ -758,31 +807,27 @@ def is_known_mission(mission_id: str | int) -> bool:
             except Exception:
                 pass
         _KNOWN_MISSIONS = smissions
-    return str(mission_id) in _KNOWN_MISSIONS
+    return smid in _KNOWN_MISSIONS
 
 
 _EXPLORATION_BUNDLES = None
 
 
-def get_exploration_bundle(mid: str) -> dict | None:
+def get_exploration_bundle(mid: str | int | None) -> dict | None:
+    smid = str(mid or '')
+    if not smid or smid in ('None', '0', ''):
+        return None
     global _EXPLORATION_BUNDLES
     if _EXPLORATION_BUNDLES is None:
         _EXPLORATION_BUNDLES = {}
-        for candidate_dir in [
-            HERE,
-            os.path.join(HERE, 'content'),
-            os.path.join(os.path.dirname(HERE), 'content'),
-            os.path.join(os.getcwd(), 'source', 'server'),
-        ]:
-            path = os.path.join(candidate_dir, 'exploration_bundles.json')
-            if os.path.exists(path):
-                try:
-                    with open(path, encoding='utf-8') as fh:
-                        _EXPLORATION_BUNDLES = json.load(fh)
-                        break
-                except Exception:
-                    pass
-    return _EXPLORATION_BUNDLES.get(str(mid))
+        path = _find_server_file('exploration_bundles.json')
+        if path:
+            try:
+                with open(path, encoding='utf-8') as fh:
+                    _EXPLORATION_BUNDLES = json.load(fh)
+            except Exception:
+                pass
+    return _EXPLORATION_BUNDLES.get(smid)
 
 
 def build_esper_bundle(mid: str, base_bundle: dict | None = None, authored: dict | None = None) -> dict | None:
@@ -914,13 +959,22 @@ def ensure_battle_bundle(mid: str, spec: dict | None, authored: dict | None = No
     return spec
 
 
-def event_encounter(mission: str) -> dict | None:
+def event_encounter(mission: str | int | None) -> dict | None:
+    smid = str(mission or '')
+    if not smid or smid in ('None', '0', ''):
+        return None
     global _EVENT_ENCOUNTERS
     if _EVENT_ENCOUNTERS is None:
-        path = os.path.join(HERE, 'event_encounters.json')
-        with open(path, encoding='utf-8') as fh:
-            _EVENT_ENCOUNTERS = json.load(fh)['missions']
-    entry = _EVENT_ENCOUNTERS.get(str(mission))
+        path = _find_server_file('event_encounters.json')
+        if path:
+            try:
+                with open(path, encoding='utf-8') as fh:
+                    _EVENT_ENCOUNTERS = json.load(fh).get('missions', {})
+            except Exception:
+                pass
+        if _EVENT_ENCOUNTERS is None:
+            _EVENT_ENCOUNTERS = {}
+    entry = _EVENT_ENCOUNTERS.get(smid)
     if not entry:
         return None
     bundle = entry['bundle']
@@ -943,13 +997,14 @@ def event_encounter(mission: str) -> dict | None:
     return bundle
 
 
-def event_binding(mission: str) -> dict | None:
-    global _EVENT_BINDINGS
-    if _EVENT_BINDINGS is None:
-        path = os.path.join(HERE, 'event_battles.json')
-        with open(path, encoding='utf-8') as fh:
-            _EVENT_BINDINGS = json.load(fh)['missions']
-    return _EVENT_BINDINGS.get(str(mission))
+def event_binding(mission: str | int | None) -> dict | None:
+    smid = str(mission or '')
+    if not smid or smid in ('None', '0', ''):
+        return None
+    try:
+        return _get_event_battles_data().get('missions', {}).get(smid)
+    except Exception:
+        return None
 
 
 class EventSource(Source):
