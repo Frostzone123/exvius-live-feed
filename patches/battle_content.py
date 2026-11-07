@@ -727,11 +727,129 @@ def event_support(table: str) -> list:
 
 
 def resource_kind(mission: str) -> str | None:
+    smid = str(mission)
+    if smid in ('1115005', '1115006', '1115007'):
+        return None
+    if smid == '1115004':
+        return 'exploration'
     global _EVENT_RESOURCE_MISSIONS
     if _EVENT_RESOURCE_MISSIONS is None:
         with open(os.path.join(HERE, 'event_battles.json'), encoding='utf-8') as fh:
             _EVENT_RESOURCE_MISSIONS = json.load(fh).get('resource_missions', {})
-    return _EVENT_RESOURCE_MISSIONS.get(str(mission))
+    return _EVENT_RESOURCE_MISSIONS.get(smid)
+
+
+def build_esper_bundle(mid: str, base_bundle: dict | None = None, authored: dict | None = None) -> dict | None:
+    """Build or repair an esper battle bundle (1★, 2★, or 3★ Ifrit)."""
+    smid = str(mid)
+    if smid not in ('1115005', '1115006', '1115007'):
+        return None
+    source = _default_index_source()
+    if authored is None:
+        try:
+            with open(DEFAULT_RESPONSES, encoding='utf-8') as fh:
+                authored = {k: v for k, v in json.load(fh).items() if not k.startswith('_')}
+        except Exception:
+            authored = {}
+
+    if smid == '1115005':
+        base = dict(base_bundle) if isinstance(base_bundle, dict) else dict(authored.get(f'{BATTLE_BUNDLE_REPLY_ID}@1115005', {}))
+        derived = derive_mission(1115005, source, field_groups={'111500511'})
+        if not base.get('an6TB4WS'):
+            base['1IfDqR4n'] = []
+            carrier = authored.get(BATTLE_BUNDLE_REPLY_ID, {})
+            base['LhVz6aD2'] = carrier.get('LhVz6aD2', [])
+            base['an6TB4WS'] = [
+                {'qo3PECw6': '1115005', '6v7y3QcJ': str(i), 'gou39JeI': '2', 'i2ar9yXM': '0', '5LZN8C9I': '0',
+                 'YS9kfCX7': '400005', 'DYTx1Is3': '0', 'T03qgLWA': '1', '6uIYE15X': '111500401', 'J9gafF0t': '0',
+                 'V2mCH5UR': '', 'juA0Z4m7': '', '1C7GDEv4': '', 'Us0znif6': '0', 'k6Y8ysMA': '0', 'wTMK0x5p': '0:0:0:0',
+                 '2fY1IomW': '111500401'} for i in range(1, 4)
+            ]
+            base['an6TB4WS'].append({
+                'qo3PECw6': '1115005', '6v7y3QcJ': '4', 'gou39JeI': '2', 'i2ar9yXM': '1', '5LZN8C9I': '0',
+                'YS9kfCX7': '400007', 'DYTx1Is3': '0', 'T03qgLWA': '1', '6uIYE15X': '111500502', 'J9gafF0t': '1',
+                'V2mCH5UR': '', 'juA0Z4m7': '', '1C7GDEv4': '', 'Us0znif6': '0', 'k6Y8ysMA': '0', 'wTMK0x5p': '0:0:0:0',
+                '2fY1IomW': '111500511'
+            })
+            base['Bi6hVv34'] = [{'2fY1IomW': '111500401', 'xqartN26': '201002000', 'MxLFKZ13': '190,279', 'Z0EN6jSh': '1', '3t7pZM5V': '0', 'WJdBp9f0': '1', 'm9BvFk2X': '1'}]
+            base['wbet57nF'] = [{'xqartN26': '201002000', 'G4L0YIB2': 'バーバラス', 'V9j8wJcC': '2010020'}]
+            base['bV34YIJQ'] = [p for p in source.load('F_MONSTER_PARTS_MST') if p.get('xqartN26') == '201002000'][:1]
+            base['Wp39QX52'] = []
+            base['y35YvQjZ'] = []
+
+        existing_groups = {g.get('2fY1IomW') for g in base.get('Bi6hVv34', [])}
+        for g in derived.get('Bi6hVv34', []):
+            if g.get('2fY1IomW') not in existing_groups:
+                base.setdefault('Bi6hVv34', []).append(g)
+
+        existing_monsters = {m.get('xqartN26') for m in base.get('wbet57nF', [])}
+        for m in derived.get('wbet57nF', []):
+            if m.get('xqartN26') not in existing_monsters:
+                base.setdefault('wbet57nF', []).append(m)
+
+        existing_parts = {p.get('xqartN26') for p in base.get('bV34YIJQ', [])}
+        for p in derived.get('bV34YIJQ', []):
+            if p.get('xqartN26') not in existing_parts:
+                base.setdefault('bV34YIJQ', []).append(p)
+
+        existing_skills = {s.get('6E5u1xrs') for s in base.get('Wp39QX52', [])}
+        for s in derived.get('Wp39QX52', []):
+            if s.get('6E5u1xrs') not in existing_skills:
+                base.setdefault('Wp39QX52', []).append(s)
+
+        if base.get('an6TB4WS'):
+            w4 = base['an6TB4WS'][-1]
+            w4['2fY1IomW'] = '111500511'
+            w4['6uIYE15X'] = '111500502'
+            w4['YS9kfCX7'] = '400007'
+            w4['i2ar9yXM'] = '1'
+            w4['J9gafF0t'] = '1'
+            w_idx = str(w4.get('6v7y3QcJ', '4'))
+            for row in base.get('y35YvQjZ', []):
+                if str(row.get('6v7y3QcJ')) == w_idx:
+                    row['xqartN26'] = '301021000'
+                    if derived.get('bV34YIJQ'):
+                        row['9BetM2Ds'] = derived['bV34YIJQ'][0].get('9BetM2Ds', '')
+        return base
+
+    group_id = '111500512' if smid == '1115006' else '111500513'
+    derived = derive_mission(int(smid), source, field_groups={group_id})
+    carrier = authored.get(BATTLE_BUNDLE_REPLY_ID, {})
+    part_row = derived['bV34YIJQ'][0] if derived.get('bV34YIJQ') else {}
+    monster_id = part_row.get('xqartN26', '301021001' if smid == '1115006' else '301021002')
+    return {
+        '1IfDqR4n': [],
+        'LhVz6aD2': carrier.get('LhVz6aD2', []),
+        'an6TB4WS': [{
+            'qo3PECw6': smid, '6v7y3QcJ': '1', 'gou39JeI': '2', 'i2ar9yXM': '1', '5LZN8C9I': '0',
+            'YS9kfCX7': '400007', 'DYTx1Is3': '0', 'T03qgLWA': '1', '6uIYE15X': '111500502', 'J9gafF0t': '1',
+            'V2mCH5UR': '', 'juA0Z4m7': '', '1C7GDEv4': '', 'Us0znif6': '0', 'k6Y8ysMA': '0', 'wTMK0x5p': '0:0:0:0',
+            '2fY1IomW': group_id
+        }],
+        'Bi6hVv34': derived.get('Bi6hVv34', []),
+        'wbet57nF': derived.get('wbet57nF', []),
+        'bV34YIJQ': derived.get('bV34YIJQ', []),
+        'Wp39QX52': derived.get('Wp39QX52', []),
+        'y35YvQjZ': [{
+            'qo3PECw6': smid, '6v7y3QcJ': '1', 'pIHCrf40': '1', '2fY1IomW': '1',
+            'xqartN26': monster_id, 'Z0EN6jSh': '1', '6Yc4RkdM': '1',
+            '9BetM2Ds': part_row.get('9BetM2Ds', ''),
+            'MZn8LC6H': '', 'g4voc2Aw': '', '3frn4ILX': '', 'IRf10dwx': '', 'ATM35pjf': '', 'e5xoiC84': '', 'Vf5DGw07': ''
+        }]
+    }
+
+
+def ensure_battle_bundle(mid: str, spec: dict | None, authored: dict | None = None) -> dict | None:
+    """Ensure battle bundles for esper missions contain their boss battle groups and monster data."""
+    smid = str(mid)
+    if smid in ('1115005', '1115006', '1115007'):
+        if smid == '1115005' and isinstance(spec, dict):
+            has_ifrit = any(str(g.get('2fY1IomW')) == '111500511' for g in spec.get('Bi6hVv34', []))
+            has_phase = any(str(p.get('2fY1IomW')) == '111500511' for p in spec.get('an6TB4WS', []))
+            if has_ifrit and has_phase:
+                return spec
+        return build_esper_bundle(smid, base_bundle=spec, authored=authored)
+    return spec
 
 
 def event_encounter(mission: str) -> dict | None:
@@ -819,12 +937,21 @@ def assemble(mission: int | str, *, authored: dict | None = None, mode: str | No
         with open(DEFAULT_RESPONSES, encoding="utf-8") as fh:
             authored = {k: v for k, v in json.load(fh).items() if not k.startswith("_")}
     if key in authored:
+        spec = authored[key]
+        if mid in ('1115005', '1115006', '1115007'):
+            spec = ensure_battle_bundle(mid, spec, authored=authored)
         if origin is not None:
             origin["where"] = "authored"
-        return authored[key]
+        return spec
     mode = mode or derive_mode()
     if mode == "off":
         return None
+    if mid in ('1115005', '1115006', '1115007'):
+        esper_bundle = build_esper_bundle(mid, authored=authored)
+        if esper_bundle is not None:
+            if origin is not None:
+                origin["where"] = "esper-bundle"
+            return esper_bundle
     if source is None:
         reconstructed = event_encounter(mid)
         if reconstructed is not None:
