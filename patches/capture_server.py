@@ -189,6 +189,11 @@ class Handler(BaseHTTPRequestHandler):
             spec = State.replies.get(f"{reply_id}@{mid}")
             if spec is not None:
                 spec_key = f"{reply_id}@{mid}"
+            if reply_id == BATTLE_BUNDLE_REPLY_ID:
+                fixed_spec = battle_content.ensure_battle_bundle(mid, spec, authored=State.replies)
+                if fixed_spec is not None:
+                    spec = fixed_spec
+                    spec_key = f"{reply_id}@{mid}"
         # THE DERIVED-CONTENT PATH (APP-33). `responses.json` only holds the beats WE authored; every other
         # mission used to fall through to the bare placeholder and play its default battle. When the
         # per-mission key is absent and this is the battle-bundle carrier, assemble the mission's bundle
