@@ -185,6 +185,7 @@ class Handler(BaseHTTPRequestHandler):
         reload_season_if_changed()
         warn_if_source_is_newer()
         mid = mission_id_from(plaintext)
+        bundle_source = None
         if mid:
             spec = State.replies.get(f"{reply_id}@{mid}")
             if spec is not None:
@@ -194,12 +195,24 @@ class Handler(BaseHTTPRequestHandler):
                 if fixed_spec is not None:
                     spec = fixed_spec
                     spec_key = f"{reply_id}@{mid}"
+                    if battle_content.resource_kind(mid) == 'exploration':
+                        bundle_source = 'exploration'
         # THE DERIVED-CONTENT PATH (APP-33). `responses.json` only holds the beats WE authored; every other
         # mission used to fall through to the bare placeholder and play its default battle. When the
         # per-mission key is absent and this is the battle-bundle carrier, assemble the mission's bundle
         # from the tracked index (or the per-area cache) instead. Authored wins ABOVE -- this block only
         # runs when no `@`-key exists -- and `BATTLE_DERIVE=off` disables it entirely (the golden control).
-        bundle_source = None
+        # Explorations load their original map/script resources first. Their
+        # wave limit describes field encounters, not an opening battle roster.
+        # Keep the mission key so normal entry costs and completion still apply.
+        if (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
+                and reply_id in State.replies and (battle_content.resource_kind(mid) == 'exploration'
+                    or str((mission_row(mid) or {}).get('Y4VoF8yu')) == '2')):
+            row = mission_row(mid) or {'qo3PECw6': str(mid)}
+            spec = battle_content.field_mission_bundle(State.replies[reply_id], row)
+            spec_key, bundle_source = f"{reply_id}@{mid}", 'exploration'
+        elif mid and reply_id == BATTLE_BUNDLE_REPLY_ID and battle_content.resource_kind(mid) == 'exploration':
+            bundle_source = 'exploration'
         # Only missions have encounters. Story map events (F_MAP_EVENT_MST,
         # e.g. 1002001 entering Latius Woods) and towns (F_TOWN_MST, e.g. 1101
         # Mitra) load through the same request: serve the carrier without an
@@ -207,8 +220,10 @@ class Handler(BaseHTTPRequestHandler):
         # it as a mission load (no attempt, drops or save change). An id in no
         # known table is still served that way, but logged loudly.
         menu_resource = battle_content.is_menu_resource_row(mission_row(mid)) if mid else False
+        is_expl = (bundle_source == 'exploration' or battle_content.resource_kind(mid) == 'exploration')
         no_encounter = (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
-                        and reply_id in State.replies and (mission_row(mid) is None or menu_resource))
+                        and reply_id in State.replies and not is_expl
+                        and (is_map_event(mid) or is_town(mid) or menu_resource or not battle_content.is_known_mission(mid)))
         if no_encounter:
             kind = "menu-resource" if menu_resource else "map-event" if is_map_event(mid) else "town" if is_town(mid) else "unrecognised"
             if kind == "unrecognised":
@@ -218,16 +233,6 @@ class Handler(BaseHTTPRequestHandler):
             spec = (battle_content.story_mission_bundle(State.replies[reply_id], mission_row(mid)) if menu_resource
                     else battle_content.story_event_bundle(State.replies[reply_id]))
             spec_key = f"{reply_id}#{kind}"
-        # Explorations load their original map/script resources first. Their
-        # wave limit describes field encounters, not an opening battle roster.
-        # Keep the mission key so normal entry costs and completion still apply.
-        if (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
-                and reply_id in State.replies and (battle_content.resource_kind(mid) == 'exploration'
-                    or str((mission_row(mid) or {}).get('Y4VoF8yu')) == '2')):
-            row = mission_row(mid)
-            if row is not None:
-                spec = battle_content.field_mission_bundle(State.replies[reply_id], row)
-                spec_key, bundle_source = f"{reply_id}@{mid}", 'exploration'
         # Story-only missions still need their original non-combat phases.
         # Omitting those phases makes the client immediately finish the mission
         # without entering its story scene.
@@ -267,6 +272,8 @@ class Handler(BaseHTTPRequestHandler):
             mission_rows = (spec.get("an6TB4WS") or spec.get("1IfDqR4n")) if isinstance(spec, dict) else None
             if not mid or spec_key != f"{reply_id}@{mid}":
                 missing_battle = f"mission {mid or '(missing ID)'}: no matching local battle bundle"
+            elif bundle_source == 'exploration':
+                pass
             elif not isinstance(mission_rows, list) or not mission_rows:
                 missing_battle = f"mission {mid}: local battle bundle has no mission rows"
             elif any(not isinstance(row, dict) or str(row.get("qo3PECw6")) != str(mid)

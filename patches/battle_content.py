@@ -571,8 +571,13 @@ _FIELD_BINDINGS_DATA = None
 
 def field_mission_bundle(carrier: dict, mission: dict) -> dict:
     """Serve original field groups and their entire monster/skill dependency chain."""
-    mid = str(mission['qo3PECw6'])
+    mid = str(mission.get('qo3PECw6') or '')
     source = _default_index_source()
+    if 'qo3PECw6' not in mission or len(mission) <= 1:
+        for r in source.load('F_MISSION_MST'):
+            if str(r.get('qo3PECw6')) == mid:
+                mission = {**r, **mission}
+                break
     group_ids = {str(row['2fY1IomW']) for row in source.load('F_BATTLE_GROUP_MST')
                  if str(row['2fY1IomW']).startswith(mid)
                  and len(str(row['2fY1IomW'])) == len(mid) + 2}
@@ -739,6 +744,17 @@ def resource_kind(mission: str) -> str | None:
     return _EVENT_RESOURCE_MISSIONS.get(smid)
 
 
+_KNOWN_MISSIONS = None
+
+
+def is_known_mission(mission_id: str | int) -> bool:
+    global _KNOWN_MISSIONS
+    if _KNOWN_MISSIONS is None:
+        source = _default_index_source()
+        _KNOWN_MISSIONS = {str(r.get('qo3PECw6', '')) for r in source.load('F_MISSION_MST')}
+    return str(mission_id) in _KNOWN_MISSIONS
+
+
 def build_esper_bundle(mid: str, base_bundle: dict | None = None, authored: dict | None = None) -> dict | None:
     """Build or repair an esper battle bundle (1★, 2★, or 3★ Ifrit)."""
     smid = str(mid)
@@ -849,6 +865,13 @@ def ensure_battle_bundle(mid: str, spec: dict | None, authored: dict | None = No
             if has_ifrit and has_phase:
                 return spec
         return build_esper_bundle(smid, base_bundle=spec, authored=authored)
+    if resource_kind(smid) == 'exploration':
+        if isinstance(spec, dict) and spec.get('6v0LPiRe'):
+            return spec
+        from player_state import mission_row
+        row = mission_row(smid) or {'qo3PECw6': smid}
+        carrier = authored.get(BATTLE_BUNDLE_REPLY_ID, {}) if authored else {}
+        return field_mission_bundle(carrier, row)
     return spec
 
 
