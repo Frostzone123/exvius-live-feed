@@ -2,8 +2,8 @@
   "files": [
     {
       "name": "capture_server.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/capture_server.py?v=37",
-      "sha256": "337c3828e8ee7fc428c74351c574e9155c49b93d4d7deae4e997bb9d786314c2"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/capture_server.py?v=38",
+      "sha256": "dcfdaea8d76531c2392b3ffda6ec6fa531d23225068d4507ac547e67d28e0511"
     },
     {
       "name": "ffbe_gacha.py",
@@ -87,8 +87,8 @@
     },
     {
       "name": "battle_content.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/battle_content.py?v=37",
-      "sha256": "6a4f2087fd91e87ac76bd71dc405ba33b6c88e12428738ba7ee88055170c2c8a"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/battle_content.py?v=38",
+      "sha256": "43c25cdd25adcb77f9f53205e2c112422f76dfdcefa26995be3fe444ea70d9e6"
     },
     {
       "name": "exploration_bundles.json",
