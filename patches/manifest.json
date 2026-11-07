@@ -84,6 +84,11 @@
       "name": "exvius_actions_shops.py",
       "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/exvius_actions_shops.py?v=29",
       "sha256": "840456ccd32b02be2e4f40f02c7b44fede28f16b8535e61b44d5e2ec0a6f9ed5"
+    },
+    {
+      "name": "battle_content.py",
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/battle_content.py?v=34",
+      "sha256": "5e90f4945724eb92079c407754703d72d0491d490e174caa3f9872a39d962263"
     }
   ]
 }
