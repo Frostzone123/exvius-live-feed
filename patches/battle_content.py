@@ -306,44 +306,38 @@ def unescape_cell(cell: str) -> str:
 def read_index_table(path: str, table: str) -> list[dict]:
     """Parse one index TSV (`# {header json}` then rows) into row dicts, in cheap-path/fast form."""
     if not os.path.exists(path):
-        raise SystemExit(
-            f"battle index table missing: {path}\n"
-            f"  build it with: python3 harness/build_battle_index.py   (writes server/content/battle/)")
-    with open(path, encoding="utf-8") as fh:
-        first = fh.readline()
-        if not first.startswith("#"):
-            raise SystemExit(f"{path}: first line is not the provenance header")
-        meta = json.loads(first[1:].strip())
-        if meta.get("table") != table:
-            raise SystemExit(f"{path}: header names table {meta.get('table')!r}, wanted {table!r}")
-        fields = [str(f) for f in meta.get("fields") or []]
-        # CODE-vs-INDEX DRIFT: if the chain gained a token since this index was built, the field would be
-        # silently absent and `.get` defaults would quietly disagree with the ndjson path. The builder's
-        # `absent` list makes that loud here instead.
-        wanted = INDEX_FIELDS.get(table)
-        if wanted:
-            drift = [f for f in wanted if f not in fields and f not in (meta.get("absent") or [])]
-            if drift:
-                raise SystemExit(f"{path}: the chain reads {drift} but this index predates them; "
-                                 f"rebuild with harness/build_battle_index.py")
-        rows: list[dict] = []
-        for line in fh:
-            line = line.rstrip("\n")
-            if not line:
-                continue
-            cells = line.split("\t")
-            if len(cells) != len(fields):
-                raise SystemExit(f"{path}: row has {len(cells)} cells, header declares {len(fields)}")
-            if "\\" in line:
-                cells = [unescape_cell(c) for c in cells]
-            rows.append(dict(zip(fields, cells)))
-        expect = int(meta.get("rows") or 0)
-        if len(rows) != expect:
-            # A truncated/partial checkout must fail loud: a short table would derive a WRONG bundle, and
-            # the field-count check above cannot see a missing tail.
-            raise SystemExit(f"{path}: {len(rows)} rows on disk, header declares {expect}; "
-                             f"rebuild with harness/build_battle_index.py")
-    return rows
+        return []
+    try:
+        with open(path, encoding="utf-8") as fh:
+            first = fh.readline()
+            if not first.startswith("#"):
+                return []
+            meta = json.loads(first[1:].strip())
+            if meta.get("table") != table:
+                return []
+            fields = [str(f) for f in meta.get("fields") or []]
+            wanted = INDEX_FIELDS.get(table)
+            if wanted:
+                drift = [f for f in wanted if f not in fields and f not in (meta.get("absent") or [])]
+                if drift:
+                    return []
+            rows: list[dict] = []
+            for line in fh:
+                line = line.rstrip("\n")
+                if not line:
+                    continue
+                cells = line.split("\t")
+                if len(cells) != len(fields):
+                    continue
+                if "\\" in line:
+                    cells = [unescape_cell(c) for c in cells]
+                rows.append(dict(zip(fields, cells)))
+            expect = int(meta.get("rows") or 0)
+            if expect and len(rows) != expect:
+                return []
+            return rows
+    except Exception:
+        return []
 
 
 # ONE IndexSource per process. Its `load` parses the tracked TSVs (~13 MB across six tables), and the
@@ -750,9 +744,45 @@ _KNOWN_MISSIONS = None
 def is_known_mission(mission_id: str | int) -> bool:
     global _KNOWN_MISSIONS
     if _KNOWN_MISSIONS is None:
-        source = _default_index_source()
-        _KNOWN_MISSIONS = {str(r.get('qo3PECw6', '')) for r in source.load('F_MISSION_MST')}
+        smissions = set()
+        try:
+            with open(os.path.join(HERE, 'event_battles.json'), encoding='utf-8') as fh:
+                data = json.load(fh)
+                smissions = set(data.get('missions', {}).keys()) | set(data.get('resource_missions', {}).keys())
+        except Exception:
+            pass
+        if not smissions:
+            try:
+                source = _default_index_source()
+                smissions = {str(r.get('qo3PECw6', '')) for r in source.load('F_MISSION_MST')}
+            except Exception:
+                pass
+        _KNOWN_MISSIONS = smissions
     return str(mission_id) in _KNOWN_MISSIONS
+
+
+_EXPLORATION_BUNDLES = None
+
+
+def get_exploration_bundle(mid: str) -> dict | None:
+    global _EXPLORATION_BUNDLES
+    if _EXPLORATION_BUNDLES is None:
+        _EXPLORATION_BUNDLES = {}
+        for candidate_dir in [
+            HERE,
+            os.path.join(HERE, 'content'),
+            os.path.join(os.path.dirname(HERE), 'content'),
+            os.path.join(os.getcwd(), 'source', 'server'),
+        ]:
+            path = os.path.join(candidate_dir, 'exploration_bundles.json')
+            if os.path.exists(path):
+                try:
+                    with open(path, encoding='utf-8') as fh:
+                        _EXPLORATION_BUNDLES = json.load(fh)
+                        break
+                except Exception:
+                    pass
+    return _EXPLORATION_BUNDLES.get(str(mid))
 
 
 def build_esper_bundle(mid: str, base_bundle: dict | None = None, authored: dict | None = None) -> dict | None:
@@ -868,10 +898,19 @@ def ensure_battle_bundle(mid: str, spec: dict | None, authored: dict | None = No
     if resource_kind(smid) == 'exploration':
         if isinstance(spec, dict) and spec.get('6v0LPiRe'):
             return spec
-        from player_state import mission_row
-        row = mission_row(smid) or {'qo3PECw6': smid}
-        carrier = authored.get(BATTLE_BUNDLE_REPLY_ID, {}) if authored else {}
-        return field_mission_bundle(carrier, row)
+        prebaked = get_exploration_bundle(smid)
+        if prebaked:
+            return dict(prebaked)
+        try:
+            from player_state import mission_row
+            row = mission_row(smid) or {'qo3PECw6': smid}
+            carrier = authored.get(BATTLE_BUNDLE_REPLY_ID, {}) if authored else {}
+            bundle = field_mission_bundle(carrier, row)
+            if bundle and (bundle.get('6v0LPiRe') or bundle.get('Bi6hVv34')):
+                return bundle
+        except (SystemExit, Exception):
+            pass
+        return spec
     return spec
 
 

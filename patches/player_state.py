@@ -901,19 +901,7 @@ def is_town(town_id) -> bool:
 def mission_row(mission_id) -> dict | None:
     """The mission's own `F_MISSION_MST` row (shipped Global table)."""
     row = _load_ndjson("F_MISSION_MST.ndjson", MISSION_KEY).get(str(mission_id))
-    if row:
-        return dict(row)
-    try:
-        from battle_content import _default_index_source
-        global _MISSION_INDEX
-        if '_MISSION_INDEX' not in globals() or _MISSION_INDEX is None:
-            _MISSION_INDEX = {str(r.get('qo3PECw6', '')): r for r in _default_index_source().load('F_MISSION_MST')}
-        indexed = _MISSION_INDEX.get(str(mission_id))
-        if indexed:
-            return dict(indexed)
-    except Exception:
-        pass
-    return None
+    return dict(row) if row else None
 
 
 def mission_wave_count(mission_id) -> int | None:
