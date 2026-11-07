@@ -32,8 +32,8 @@
     },
     {
       "name": "player_state.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=29",
-      "sha256": "82f478743966c9a872c50ef076cebe20788a1088168112cfea9e0e46a0dd6ff1"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/player_state.py?v=30",
+      "sha256": "303577878e8899f858b94e607f1b5c5d365409c4ec9e199f1e7c7bb9057fd398"
     },
     {
       "name": "gacha_standard.json",
@@ -57,8 +57,8 @@
     },
     {
       "name": "exvius_actions.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/exvius_actions.py?v=32",
-      "sha256": "a0f42758e9d976b184a374fcdc36dafec63d5ed76c6435074b29994b9c7df0db"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/exvius_actions.py?v=33",
+      "sha256": "4d801f3c0a5c4eab74b67d45e8a1d2378afbe5e13a7c703d9079929fefbf4321"
     },
     {
       "name": "ffbe_battle.py",
@@ -82,8 +82,8 @@
     },
     {
       "name": "exvius_actions_shops.py",
-      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/exvius_actions_shops.py?v=28",
-      "sha256": "5215afa3ea088eeb67e259ea8409ecb86e5d979cb44f4f9743e65ef13298f5f1"
+      "url": "https://raw.githubusercontent.com/Frostzone123/exvius-live-feed/main/patches/exvius_actions_shops.py?v=29",
+      "sha256": "840456ccd32b02be2e4f40f02c7b44fede28f16b8535e61b44d5e2ec0a6f9ed5"
     }
   ]
 }

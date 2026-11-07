@@ -109,6 +109,8 @@ def unit_class_up(spec, req):
     before = unit["master_id"]
     unit["master_id"] = str(step["t74crqAL"])
     unit = State.player.renew_unit_instance(iid)
+    if hasattr(State.player, "register_unit_dictionary"):
+        State.player.register_unit_dictionary(unit["master_id"])
     from player_state import unit_mst
     destination = unit_mst(unit['master_id']) or {}
     State.player.record_archive({'TOTAL_UNIT_CLASS_UP': 1, 'TOTAL_UNIT_RARE7_CLASS_UP':

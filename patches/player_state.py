@@ -335,6 +335,17 @@ def _load_ndjson(fname: str, key_token: str | None = None) -> dict:
     if cache_key in _TABLES:
         return _TABLES[cache_key]
     path = os.path.join(MST_DIR, fname)
+    if not os.path.exists(path):
+        for candidate_dir in [
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content'),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../scratch'),
+            os.path.join(os.getcwd(), 'scratch'),
+            os.path.join(os.getcwd(), 'data'),
+        ]:
+            cpath = os.path.join(candidate_dir, fname)
+            if os.path.exists(cpath):
+                path = cpath
+                break
     rows: dict = {}
     if not os.path.exists(path):
         return rows
@@ -2407,6 +2418,7 @@ class PlayerState:
             self._apply_unit_reward_metadata(unit, {'affinity_points': moogle})
         self.data["roster"].append(unit)
         _refresh_derived_counts(self.data)
+        self.register_unit_dictionary(master_id)
         return unit
 
     def grant_beast(self, esper_id, rarity=1, level=1, board=None, link_deck=None, cp=None) -> dict | None:
@@ -3091,6 +3103,157 @@ class PlayerState:
         for index in indices:
             digits[index // 4] |= 1 << (3 - index % 4)
         return [{'eAM5B1qt': ''.join(format(n, 'x') for n in digits)}]
+
+    def register_unit_dictionary(self, master_id: str | int) -> None:
+        """Register a unit master ID in the player's permanent unit dictionary."""
+        if not master_id:
+            return
+        mid = str(master_id)
+        current = self.data.setdefault("unit_dictionary", [])
+        if mid not in current:
+            current.append(mid)
+            if self.mode != "frozen":
+                self.dirty = True
+
+    def unit_dictionary_rows(self) -> list:
+        """Unit dictionary registration uses the unit master's dictionary index (QLfe23bu)
+        and an MSB-first hex nibble bitmap sent in group VpWnB21X under field KJv6V7G9.
+
+        In libgame.so:
+        - UserUnitDictionaryResponse::readParam parses KJv6V7G9 into UserUnitDictionary bitmap
+        - UserUnitDictionary::getItemIndex reads QLfe23bu from UnitMst (+0x124)
+        - UserDictionaryBase::isRegistered indexes bit 3 - (index % 4) of digit (index // 4)
+        - LibraryUnitDetailScene::getUnitExplain and LibraryUnitScene suppress unit bio,
+          awakening dialogue, fusion dialogue, and summon dialogue if isRegistered is false.
+        """
+        mst = _load_ndjson("F_UNIT_MST.ndjson", UNIT_KEY)
+        if not mst:
+            return []
+        dict_ids = set(self.data.setdefault("unit_dictionary", []))
+        for u in self.data.get("roster", []):
+            mid = u.get("master_id")
+            if mid:
+                dict_ids.add(str(mid))
+        # Brave Shift forms (JPW8Vs40) belong to the unit series and share unlock registration
+        for mid in list(dict_ids):
+            row = mst.get(str(mid))
+            if row:
+                shift_id = str(row.get("JPW8Vs40") or "0")
+                if shift_id != "0" and shift_id in mst:
+                    dict_ids.add(shift_id)
+        if len(dict_ids) != len(self.data["unit_dictionary"]):
+            self.data["unit_dictionary"] = sorted(dict_ids, key=lambda x: int(x) if x.isdigit() else x)
+        indices = set()
+        for mid in dict_ids:
+            row = mst.get(str(mid))
+            if row:
+                idx = row.get("QLfe23bu")
+                if idx and str(idx).isdigit():
+                    indices.add(int(idx))
+        if not indices:
+            return []
+        digits = [0] * (max(indices) // 4 + 1)
+        for index in indices:
+            digits[index // 4] |= 1 << (3 - (index % 4))
+        return [{"KJv6V7G9": "".join(format(n, "x") for n in digits)}]
+
+    def equip_dictionary_rows(self) -> list:
+        """UserEquipItemDictionaryResponse (m4Bk5ex3): bitmap under KJv6V7G9."""
+        mst = _load_ndjson("F_EQUIP_ITEM_MST.ndjson", "J1YX9kmM")
+        if not mst:
+            return []
+        owned = {str(it.get("item_id")) for it in self._items()
+                 if str(it.get("item_type")) == "21" and int(it.get("count", 0)) > 0}
+        for u in self.data.get("roster", []):
+            for iid in (u.get("equipment") or {}).values():
+                if str(iid) and str(iid) != "0":
+                    owned.add(str(iid))
+            for iid in (u.get("shift_equipment") or {}).values():
+                if str(iid) and str(iid) != "0":
+                    owned.add(str(iid))
+        indices = [int(mst[iid]["uj0xM8dH"]) for iid in owned
+                   if iid in mst and str(mst[iid].get("uj0xM8dH", "")).isdigit()]
+        if not indices:
+            return []
+        digits = [0] * (max(indices) // 4 + 1)
+        for index in indices:
+            digits[index // 4] |= 1 << (3 - (index % 4))
+        return [{"KJv6V7G9": "".join(format(n, "x") for n in digits)}]
+
+    def materia_dictionary_rows(self) -> list:
+        """UserMateriaDictionaryResponse (wiTU2Hy1): bitmap under KJv6V7G9."""
+        mst = _load_ndjson("F_MATERIA_MST.ndjson", "H5jBL0Vf")
+        if not mst:
+            return []
+        owned = {str(it.get("item_id")) for it in self._items()
+                 if str(it.get("item_type")) == "22" and int(it.get("count", 0)) > 0}
+        for u in self.data.get("roster", []):
+            for iid in (u.get("materia") or []):
+                if str(iid) and str(iid) != "0":
+                    owned.add(str(iid))
+            for iid in (u.get("shift_materia") or []):
+                if str(iid) and str(iid) != "0":
+                    owned.add(str(iid))
+        indices = [int(mst[iid]["A86KwrGh"]) for iid in owned
+                   if iid in mst and str(mst[iid].get("A86KwrGh", "")).isdigit()]
+        if not indices:
+            return []
+        digits = [0] * (max(indices) // 4 + 1)
+        for index in indices:
+            digits[index // 4] |= 1 << (3 - (index % 4))
+        return [{"KJv6V7G9": "".join(format(n, "x") for n in digits)}]
+
+    def item_dictionary_rows(self) -> list:
+        """UserItemDictionaryResponse (6RQhbe8m): bitmap under KJv6V7G9."""
+        mst = _load_ndjson("F_ITEM_MST.ndjson", "tL6G9egd")
+        if not mst:
+            return []
+        owned = {str(it.get("item_id")) for it in self._items()
+                 if str(it.get("item_type")) == "20" and int(it.get("count", 0)) > 0}
+        indices = [int(mst[iid]["pv9q8khF"]) for iid in owned
+                   if iid in mst and str(mst[iid].get("pv9q8khF", "")).isdigit()]
+        if not indices:
+            return []
+        digits = [0] * (max(indices) // 4 + 1)
+        for index in indices:
+            digits[index // 4] |= 1 << (3 - (index % 4))
+        return [{"KJv6V7G9": "".join(format(n, "x") for n in digits)}]
+
+    def vision_card_dictionary_rows(self) -> list:
+        """UserVisionCardDictionaryResponse (ap9do2GX): bitmap under KJv6V7G9."""
+        mst = _load_ndjson("F_VISION_CARD_MST.ndjson", "5giCMUd2")
+        if not mst:
+            return []
+        owned = {str(vc.get("card_id")) for vc in self.data.get("inventory", {}).get("vision_cards", [])
+                 if vc.get("card_id")}
+        for u in self.data.get("roster", []):
+            vc_id = u.get("vision_card")
+            if vc_id and str(vc_id) != "0":
+                owned.add(str(vc_id))
+        indices = [int(mst[cid]["8s9wNSpd"]) for cid in owned
+                   if cid in mst and str(mst[cid].get("8s9wNSpd", "")).isdigit()]
+        if not indices:
+            return []
+        digits = [0] * (max(indices) // 4 + 1)
+        for index in indices:
+            digits[index // 4] |= 1 << (3 - (index % 4))
+        return [{"KJv6V7G9": "".join(format(n, "x") for n in digits)}]
+
+    def monster_dictionary_rows(self) -> list:
+        """UserMonsterDictionaryResponse (aRhHK1S9): KJv6V7G9 encounter bitmap, z41pMJvC libra bitmap."""
+        mst = _load_ndjson("F_MONSTER_DICTIONARY_MST.ndjson", "V9j8wJcC")
+        if not mst:
+            return []
+        defeated = {str(mid) for mid in self.data.get("monster_dictionary", [])}
+        indices = [int(mst[mid]["8s9wNSpd"]) for mid in defeated
+                   if mid in mst and str(mst[mid].get("8s9wNSpd", "")).isdigit()]
+        if not indices:
+            return []
+        digits = [0] * (max(indices) // 4 + 1)
+        for index in indices:
+            digits[index // 4] |= 1 << (3 - (index % 4))
+        bm = "".join(format(n, "x") for n in digits)
+        return [{"KJv6V7G9": bm, "z41pMJvC": bm, "4yk1JQBs": ""}]
 
     def _carry_items(self) -> list:
         return self.data.setdefault("inventory", {}).setdefault("carry_items", [])
@@ -4830,6 +4993,24 @@ class PlayerState:
         recipes = self.recipe_book_rows()
         if recipes:
             out['ZrDPm3j5'] = recipes
+        unit_dict = self.unit_dictionary_rows()
+        if unit_dict:
+            out['VpWnB21X'] = unit_dict
+        equip_dict = self.equip_dictionary_rows()
+        if equip_dict:
+            out['m4Bk5ex3'] = equip_dict
+        materia_dict = self.materia_dictionary_rows()
+        if materia_dict:
+            out['wiTU2Hy1'] = materia_dict
+        item_dict = self.item_dictionary_rows()
+        if item_dict:
+            out['6RQhbe8m'] = item_dict
+        vc_dict = self.vision_card_dictionary_rows()
+        if vc_dict:
+            out['ap9do2GX'] = vc_dict
+        monster_dict = self.monster_dictionary_rows()
+        if monster_dict:
+            out['aRhHK1S9'] = monster_dict
         medal = self.data.get('exvius_medal_exchange')
         if medal is not None:
             # GL9 UserMedalExchangeInfoResponse is a full count map. Product
