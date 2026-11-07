@@ -799,6 +799,8 @@ def _awaken_unit(spec, req, plus):
         unit['lb_level'] = min(int(unit.get('lb_level') or 1), int((unit_mst(unit['master_id']) or {}).get('ENwn42DV') or 1))
     source_id = str(unit['instance_id'])
     unit = State.player.renew_unit_instance(source_id)
+    if hasattr(State.player, "register_unit_dictionary"):
+        State.player.register_unit_dictionary(unit["master_id"])
     State.player.record_archive({'TOTAL_UNIT_CLASS_UP': 1})
     State.player.dirty = True
     out = _reply(spec)
