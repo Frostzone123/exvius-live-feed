@@ -191,12 +191,15 @@ class Handler(BaseHTTPRequestHandler):
             if spec is not None:
                 spec_key = f"{reply_id}@{mid}"
             if reply_id == BATTLE_BUNDLE_REPLY_ID:
-                fixed_spec = battle_content.ensure_battle_bundle(mid, spec, authored=State.replies)
-                if fixed_spec is not None:
-                    spec = fixed_spec
-                    spec_key = f"{reply_id}@{mid}"
-                    if battle_content.resource_kind(mid) == 'exploration':
-                        bundle_source = 'exploration'
+                try:
+                    fixed_spec = battle_content.ensure_battle_bundle(mid, spec, authored=State.replies)
+                    if fixed_spec is not None:
+                        spec = fixed_spec
+                        spec_key = f"{reply_id}@{mid}"
+                        if battle_content.resource_kind(mid) == 'exploration':
+                            bundle_source = 'exploration'
+                except Exception:
+                    pass
         # THE DERIVED-CONTENT PATH (APP-33). `responses.json` only holds the beats WE authored; every other
         # mission used to fall through to the bare placeholder and play its default battle. When the
         # per-mission key is absent and this is the battle-bundle carrier, assemble the mission's bundle
@@ -208,9 +211,14 @@ class Handler(BaseHTTPRequestHandler):
         if (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
                 and reply_id in State.replies and (battle_content.resource_kind(mid) == 'exploration'
                     or str((mission_row(mid) or {}).get('Y4VoF8yu')) == '2')):
-            row = mission_row(mid) or {'qo3PECw6': str(mid)}
-            spec = battle_content.field_mission_bundle(State.replies[reply_id], row)
-            spec_key, bundle_source = f"{reply_id}@{mid}", 'exploration'
+            try:
+                row = mission_row(mid) or {'qo3PECw6': str(mid)}
+                bundle = battle_content.field_mission_bundle(State.replies[reply_id], row)
+                if bundle and (bundle.get('6v0LPiRe') or bundle.get('Bi6hVv34')):
+                    spec = bundle
+                    spec_key, bundle_source = f"{reply_id}@{mid}", 'exploration'
+            except Exception:
+                pass
         elif mid and reply_id == BATTLE_BUNDLE_REPLY_ID and battle_content.resource_kind(mid) == 'exploration':
             bundle_source = 'exploration'
         # Only missions have encounters. Story map events (F_MAP_EVENT_MST,
@@ -221,9 +229,14 @@ class Handler(BaseHTTPRequestHandler):
         # known table is still served that way, but logged loudly.
         menu_resource = battle_content.is_menu_resource_row(mission_row(mid)) if mid else False
         is_expl = (bundle_source == 'exploration' or battle_content.resource_kind(mid) == 'exploration')
+        is_known = False
+        try:
+            is_known = battle_content.is_known_mission(mid)
+        except Exception:
+            pass
         no_encounter = (spec is None and mid and reply_id == BATTLE_BUNDLE_REPLY_ID
                         and reply_id in State.replies and not is_expl
-                        and (is_map_event(mid) or is_town(mid) or menu_resource or not battle_content.is_known_mission(mid)))
+                        and (is_map_event(mid) or is_town(mid) or menu_resource or not is_known))
         if no_encounter:
             kind = "menu-resource" if menu_resource else "map-event" if is_map_event(mid) else "town" if is_town(mid) else "unrecognised"
             if kind == "unrecognised":
